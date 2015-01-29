@@ -7,7 +7,7 @@ DESTDIR = ../
 QMAKE_CXXFLAGS += -std=c++0x -Wno-deprecated-register
 
 # Remove -lcudart if your system does not support CUDA
-LIBS += -L../../libpedsim -lpedsim
+LIBS += -L../../libpedsim -lpedsim -lcudart
 
 QT += opengl
 QT += widgets
