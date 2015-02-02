@@ -19,22 +19,31 @@
 #define SIMULATION_STEPS 1000000
 
 
+int par; // 0 = serial, 1 = openmp, 2 = pthreads;
+
 
 int main(int argc, char*argv[]) { 
   Ped::Model model;
   bool timing_mode = 0;
   int i = 1;
   QString scenefile = "scenario.xml";
+  par = 0;
 
   // Argument handling
   while(i < argc)
     {
-      if(argv[i][0] == '-' && argv[i][1] == '-')
-	{
-	  if(strcmp(&argv[i][2],"timing-mode") == 0)
-	    {
+      if(argv[i][0] == '-' && argv[i][1] == '-') {
+	  if(strcmp(&argv[i][2],"timing-mode") == 0){
 	      cout << "Timing mode on\n";
 	      timing_mode = true;
+	    }
+	  else if(strcmp(&argv[i][2],"openmp") == 0){
+	    par = 1;
+	    cout << "Using openmp parallelisation.\n";
+	    }
+	  else if(strcmp(&argv[i][2],"pthreads") == 0){
+	    par = 2;
+	    cout << "Using pthreads parallelisation.\n";
 	    }
 	  else
 	    {
@@ -49,7 +58,7 @@ int main(int argc, char*argv[]) {
     }
   ParseScenario parser(scenefile);
   model.setup(parser.getAgents());
-
+  model.setPar(par);
   QApplication app(argc, argv);
   
   MainWindow mainwindow(model);

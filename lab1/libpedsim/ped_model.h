@@ -9,10 +9,12 @@ namespace Ped{
   {
   public:
     void setup(std::vector<Tagent*> agentsInScenario);
+    void setPar(int arg);
+    int getPar();
     void tick();
     const std::vector<Tagent*> getAgents() const;
   private:
-    
+    int par; // 0 = serial, 1 = openmp, 2 = pthreads
     IMPLEMENTATION implementation;
     std::vector<Tagent*> agents;
   };
