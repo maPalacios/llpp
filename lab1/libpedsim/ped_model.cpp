@@ -11,15 +11,20 @@
 
 struct interval {
   int left, right;
-  Ped::Model * model;
+  std::vector<Ped::Tagent*> *agents;
 };
 
-void Ped::Model::setPar(int inPar){
+void Ped::Model::setPar(int inPar, int numProcs){
   par = inPar;
+  np = numProcs;
 }
 
 int Ped::Model::getPar(){
   return par;
+}
+
+int Ped::Model::getNumProcs(){
+  return np;
 }
 
 void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
@@ -34,23 +39,17 @@ const std::vector<Ped::Tagent*> Ped::Model::getAgents() const
 }
 
 void* tickHelp(void *arg){
-  struct interval myInterval;// = new struct interval();
-  myInterval = *((struct interval*)arg);
-  int left = myInterval.left;
-  int right = myInterval.right;
-
-  std::vector<Ped::Tagent*> agents = (myInterval.model)->getAgents();
-
-  for (int i=left; i<right; i++){
-    agents[i]->whereToGo();
-    agents[i]->go();
+  struct interval myInterval = *((struct interval*)arg);
+  for (int i=myInterval.left; i<myInterval.right; i++){
+    (*myInterval.agents)[i]->whereToGo();
+    (*myInterval.agents)[i]->go();
   }
 }
 
 void Ped::Model::tick(){
   int numAgents = agents.size();
-  if (getPar() == 2){
-    int numProc = 1;
+  if (getPar() == PTHREAD){
+    int numProc = np;
     int blocksize = agents.size()/numProc;
     pthread_t threads[numProc];
     struct interval * intervals[numProc];
@@ -59,13 +58,13 @@ void Ped::Model::tick(){
       intervals[i] = new struct interval();
       intervals[i]->left = i*blocksize;
       intervals[i]->right = (i+1)*blocksize;
-      intervals[i]->model = this;
+      intervals[i]->agents = &agents;
       pthread_create(&threads[i], NULL, &tickHelp,(void*) intervals[i]);
     }
     void * result;
     for (int i=0; i< numProc;i++)
       pthread_join(threads[i], &result);
-  } else if (getPar() == 1) {
+  } else if (getPar() == OMP) {
 #pragma omp parallel for
     for(int i=0;i<numAgents;i++){
       agents[i]->whereToGo();

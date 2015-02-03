@@ -17,18 +17,16 @@
 #include <ctime>
 #include <cstring>
 #define SIMULATION_STEPS 1000000
+enum IMPLEMENTATION {CUDA, VECTOR, OMP, PTHREAD, SEQ};
 
 
-int par; // 0 = serial, 1 = openmp, 2 = pthreads;
-
-
-int main(int argc, char*argv[]) { 
+int main(int argc, char*argv[]) {
   Ped::Model model;
   bool timing_mode = 0;
   int i = 1;
   QString scenefile = "scenario.xml";
-  par = 0;
-
+  int par = SEQ;
+  int np = 1;
   // Argument handling
   while(i < argc)
     {
@@ -38,17 +36,22 @@ int main(int argc, char*argv[]) {
 	      timing_mode = true;
 	    }
 	  else if(strcmp(&argv[i][2],"openmp") == 0){
-	    par = 1;
+	    par = OMP;
 	    cout << "Using openmp parallelisation.\n";
 	    }
 	  else if(strcmp(&argv[i][2],"pthreads") == 0){
-	    par = 2;
+	    par = PTHREAD;
 	    cout << "Using pthreads parallelisation.\n";
 	    }
-	  else
-	    {
+    else if(strcmp(&argv[i][2],"np") == 0){
+      i++;
+      if (i < argc)
+        np = atoi(argv[i]);
+      else
+        cerr << "Too few arguments, --np needs a number." << endl;
+    } else {
 	      cerr << "Unrecognized command: \"" << argv[i] << "\". Ignoring ..." << endl;
-	    }
+    }
 	}
       else // Assume it is a path to scenefile
 	{
@@ -58,13 +61,13 @@ int main(int argc, char*argv[]) {
     }
   ParseScenario parser(scenefile);
   model.setup(parser.getAgents());
-  model.setPar(par);
+  model.setPar(par, np);
   QApplication app(argc, argv);
-  
+
   MainWindow mainwindow(model);
 
 
-  
+
 
   const int delay_ms = 100;
   Timer *timer;
