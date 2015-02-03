@@ -5,7 +5,7 @@ echo "serial = " | tr -d '\n' > graph.m
 echo ";" >> graph.m
 
 echo "tab = [" >> graph.m
-for i in {1..4}
+for i in {1..8}
     do
     echo "$i " | tr -d '\n' >> graph.m
     ./demo --timing-mode --openmp --np $i | grep -Eo '[0-9]{1,4}\.[0-9]{1,4}' | tr -d '\n'  >> graph.m
