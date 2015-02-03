@@ -48,8 +48,9 @@ void* tickHelp(void *arg){
 
 void Ped::Model::tick(){
   int numAgents = agents.size();
+  int numProc = np;
+
   if (getPar() == PTHREAD){
-    int numProc = np;
     int blocksize = agents.size()/numProc;
     pthread_t threads[numProc];
     struct interval * intervals[numProc];
@@ -65,7 +66,7 @@ void Ped::Model::tick(){
     for (int i=0; i< numProc;i++)
       pthread_join(threads[i], &result);
   } else if (getPar() == OMP) {
-#pragma omp parallel for
+#pragma omp parallel for num_threads(np)
     for(int i=0;i<numAgents;i++){
       agents[i]->whereToGo();
       agents[i]->go();

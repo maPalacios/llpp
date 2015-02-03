@@ -27,6 +27,7 @@ int main(int argc, char*argv[]) {
   QString scenefile = "scenario.xml";
   int par = SEQ;
   int np = 1;
+  // 1.02
   // Argument handling
   while(i < argc)
     {
