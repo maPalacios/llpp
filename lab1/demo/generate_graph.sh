@@ -1,4 +1,5 @@
 #!/bin/bash
+export LD_LIBRARY_PATH=.
 echo "serial = " | tr -d '\n' > graph.m
     ./demo --timing-mode | grep -Eo '[0-9]{1,4}\.[0-9]{1,4}' | tr -d '\n'  >> graph.m
 echo ";" >> graph.m
