@@ -37,7 +37,7 @@
 \title{\textbf{Low-Level Parallel Programming \\
     Uppsala University -- Spring 2015 \\
     Report for Lab~$1$
-    by Team~$13$  % replace t by your team number
+    by Team~$21$  % replace t by your team number
   }
 }
 
@@ -52,7 +52,26 @@
 \includegraphics[width=\textwidth]{graph.jpg}
 \caption{Graph showing the speedup of openmp and pthreads for 1 to 8 threads.}
 \end{figure}
+
+\section{Questions}
+\begin{description}
+    \item[A] \textbf{What kind of parallelism is exposed in the identified method?}
+ \hfill \\We have used task parallelism in the identified method. The vector containing the agents is been split up into the same number of processors of the running system, where each sub-vector is individually traversed by the deployed threads.  
+    \item[B] \textbf{How is the workload distributed across the threads?} \hfill \\The workload is distributed evenly across the threads. 
+    \item[C] \textbf{Which number of thread gives you the best results? Why?} \hfill \\Our data suggests that the number of threads generally should be equal to the amount of processors in the system. In our case, the running system employs two virtual cores (SMT), which seems to benefit from the use of added threads, up to four, in the case of $OpenMP$ parallelisation. We believe the cause of $Pthreads'$ decline in performance is due to the greater overhead suffered. 
+    \item[D] \textbf{Which version (OpenMP, Pthreads) gives you better results? Why?} \hfill \\As we can see in the Fig 1, our graph shows that we get a much better result from using OpenMP as compared to Pthreads. As mentioned before this may be due to the larger overhead in Pthreads. When using Pthreads, it is up to the programmer to distribute the workload to the individual threads. We have discussed and reviewed the code, and haven't found any dependencies to explain why Pthreads performs worse than OpenMP. However, OpenMP has many built in solutions to optimize parallelisation, which could explain the results. 
+\end{description}
+
+\section{How to run}
+\begin{description}
+    \item[Serial] ./demo
+    \item[OpenMP] ./demo --openmp
+    \item[Pthreads] ./demo --pthreads
+    
+\end{description}
+    
 \section*{Intellectual Property}
+
 
 We certify that this report is solely produced by us, except where
 explicitly stated otherwise and clearly referenced, and that we can
