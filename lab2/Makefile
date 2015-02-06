@@ -1,0 +1,37 @@
+LIBPEDSIM_DIR = libpedsim
+LIBPEDSIM = $(LIBPEDSIM_DIR)/libpedsim.so
+DEMOAPP_DIR = demo
+DEMOAPP = $(DEMOAPP_DIR)/demo
+SYMLINK = $(DEMOAPP_DIR)/libpedsim.so
+NVCC=nvcc
+
+# mac related
+QMAKE_MAC = 
+MACAPP = 
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	QMAKE_MAC = -spec macx-g++-4.9
+	MACAPP = $(DEMOAPP_DIR)/demo.app/Contents/MacOS/demo
+	MACOSLINK = $(DEMOAPP_DIR)/demo
+endif
+
+all: $(LIBPEDSIM) $(DEMOAPP) 
+
+$(LIBPEDSIM) :
+	make -C $(LIBPEDSIM_DIR)
+	ln -fs ../$(LIBPEDSIM) $(SYMLINK)
+
+$(DEMOAPP): $(MACAPP)
+	cd $(DEMOAPP_DIR); qmake "LIB=$(CUDALIB)" $(QMAKE_MAC)
+	make -C $(DEMOAPP_DIR)
+
+$(MACAPP):
+	ln -fs ../$(MACAPP) $(DEMOAPP);
+
+clean:
+	make -C $(DEMOAPP_DIR) clean
+	make -C $(LIBPEDSIM_DIR) clean
+	rm -f $(SYMLINK) $(MACOSLINK) $(MACAPP)
+
+.PHONY: $(LIBPEDSIM) $(DEMOAPP)

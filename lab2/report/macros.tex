@@ -1,0 +1,168 @@
+% Useful packages:
+\usepackage[boxed]{algorithm}   % drop [boxed] is no box around algorithm wanted
+\usepackage[noend]{algorithmic} % drop [noend] if endif, endwhile, etc wanted
+\renewcommand{\algorithmiccomment}[1]{\hfill // #1}
+\usepackage{alltt}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{amsthm} \newtheorem{notation}{Notation}
+\usepackage[british]{babel}
+\usepackage{color}
+%\usepackage{float}
+%\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+%\usepackage{grffile} % allows spaces in filenames
+\usepackage[latin1]{inputenc}
+%\usepackage{mathtools} \mathtoolsset{showonlyrefs}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{sudoku}
+\usepackage{tikz} \usetikzlibrary{arrows,automata,calc,trees}
+\usepackage{hyperref} % should always be the last package
+
+% Fancy characters:
+\usepackage{pifont}
+%\newcommand{\scissors}{\ding{36}}
+%\newcommand{\phone}{\ding{37}}
+%\newcommand{\aircraft}{\ding{40}}
+%\newcommand{\envelope}{\ding{41}}
+\newcommand{\handpoint}{\ding{43}}
+%\newcommand{\victory}{\ding{44}}
+%\newcommand{\handwrite}{\ding{45}}
+\newcommand{\tick}{\ding{51}}
+\newcommand{\notick}{\ding{55}}
+\DeclareSymbolFont{extraup}{U}{zavm}{m}{n}
+%\DeclareMathSymbol{\varclubsuit}{\mathalpha}{extraup}{84}
+%\DeclareMathSymbol{\varspadesuit}{\mathalpha}{extraup}{85}
+\DeclareMathSymbol{\varheartsuit}{\mathalpha}{extraup}{86}
+\DeclareMathSymbol{\vardiamondsuit}{\mathalpha}{extraup}{87}
+
+% Colours (use sparingly!):
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\green}[1]{{\color{Green}#1}}
+\newcommand{\red}[1]{{\color{red}#1}}
+
+% Styles
+\newcommand{\stressed}[1]{\textbf{\textit{#1}}}
+\newcommand{\todo}[1]{\red{#1}}  % comment away to omit to-do items
+%\newcommand{\todo}[1]{}         % comment away to show to-do items
+\newcommand{\done}[1]{\blue{#1}} % comment away to omit done items
+%\newcommand{\done}[1]{}         % comment away to show done items
+
+% Mathematics:
+\newcommand{\AbsValue}[1]{\left\lvert#1\right\rvert}
+\newcommand{\Cardinality}[1]{\left\lvert#1\right\rvert}
+%\newcommand{\Cardinality}[1]{\##1}
+\newcommand{\Ceiling}[1]{\lceil#1\rceil}
+\newcommand{\Else}{\textbf{~else~}}
+\newcommand{\EmptySet}{\varnothing}
+\newcommand{\False}{\textbf{false}}
+\newcommand{\Floor}[1]{\lfloor#1\rfloor}
+\newcommand{\GeqLex}{\geq_\Lex}
+\newcommand{\If}{\textbf{if~}}
+\newcommand{\Iff}{\Leftrightarrow}
+\newcommand{\IfThenElse}[3]{\If#1\Then#2\Else#3}
+\newcommand{\Implies}{\Rightarrow}
+\newcommand{\Inter}{\cap}
+\newcommand{\LeqLex}{\leq_\Lex}
+\newcommand{\Let}[2]{\textbf{let~}#1\In#2}
+\newcommand{\Lex}{\text{lex}}
+\newcommand{\LtLex}{<_\Lex}
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Oh}[1]{\mathcal{O}\left(#1\right)}
+\newcommand{\Select}{\textbf{select}}
+\newcommand{\Sequence}[1]{\left[#1\right]}
+\newcommand{\Set}[1]{\left\{#1\right\}}
+\newcommand{\SetComp}[2]{\Set{#1\SuchThat#2}}
+\newcommand{\SuchThat}{\mid}
+\newcommand{\Then}{\textbf{~then~}}
+\newcommand{\True}{\textbf{true}}
+\newcommand{\Tuple}[1]{\left\langle#1\right\rangle}
+\newcommand{\Union}{\cup}
+
+% CP & Gecode:
+\newcommand{\AllDiff}{\Constraint{AllDiff}}
+\newcommand{\AllDifferent}{\Constraint{AllDifferent}}
+\newcommand{\AllEqual}{\Constraint{AllEqual}}
+\newcommand{\AnyCond}[1]{\text{Any}(#1)}
+\newcommand{\AtLeast}{\Constraint{AtLeast}}
+\newcommand{\AtMost}{\Constraint{AtMost}}
+\newcommand{\Automaton}{\Constraint{Automaton}}
+\newcommand{\BoundedCond}[1]{\text{Bounded}(#1)}
+\newcommand{\Channel}{\Constraint{Channel}}
+\newcommand{\CondSet}[1]{\text{PropConds}(#1)}
+\newcommand{\Conds}[2]{\text{Conds}(#1,#2)}
+\newcommand{\Constraint}[1]{\textsc{#1}}
+\newcommand{\Cumulative}{\Constraint{Cumulative}}
+\newcommand{\DepProps}{\textit{DepProps}}
+\newcommand{\DFE}{\text{DFE}}
+\newcommand{\Distinct}{\Constraint{Distinct}}
+\newcommand{\Domain}[1]{\text{dom}(#1)}
+\newcommand{\Element}{\Constraint{Element}}
+\newcommand{\Failed}{\text{Failed}}
+\newcommand{\FailedCond}[1]{\text{Failed}(#1)}
+\newcommand{\FixedCond}[1]{\text{Fixed}(#1)}
+\newcommand{\Fixpoint}{\text{AtFixpt}}
+\newcommand{\Gecode}{\textit{Gecode}}
+\newcommand{\GIST}{\textit{GIST}}
+\newcommand{\GlobalCardinality}{\Constraint{GCC}}
+\newcommand{\HigherOrder}[1]{\red{\left[{\color{black}#1}\right]}} % Iverson bracket
+\newcommand{\Inequalities}{\Constraint{Inequalities}}
+\newcommand{\IntValuePrecedeChain}{\Constraint{IntValuePrecedeChain}}
+\newcommand{\Linear}{\Constraint{Linear}}
+\newcommand{\MaxCond}[1]{\text{Max}(#1)}
+\newcommand{\MinCond}[1]{\text{Min}(#1)}
+\newcommand{\MiniModel}{\textit{MiniModel}}
+\newcommand{\MiniZinc}{\textit{MiniZinc}}
+\newcommand{\ModVars}{\textit{ModVars}}
+\newcommand{\NbDistinct}{\Constraint{NbDistinct}}
+\newcommand{\NoneCond}[1]{\text{None}(#1)}
+\newcommand{\Propagate}{\text{Propagate}}
+\newcommand{\Regular}{\Constraint{Regular}}
+\newcommand{\Reifies}[2]{#1\Leftrightarrow#2}
+\newcommand{\Subsumed}{\text{Subsumed}}
+\newcommand{\Sum}{\Constraint{Sum}}
+\newcommand{\Unknown}{\text{Unknown}}
+\newcommand{\Variables}[1]{\text{var}(#1)}
+
+% Modelling & Algorithms:
+\renewcommand{\algorithmicendfor}{\textbf{end try}}
+\renewcommand{\algorithmicforall}{\textbf{try all}}
+\newcommand{\Array}{\textbf{array}}
+\newcommand{\Boolean}{\textbf{boolean}}
+\newcommand{\Count}[2]{\textbf{count}(#1)~#2}
+\newcommand{\Constant}{\textbf{cst~}}
+\newcommand{\EndIf}{\textbf{~end~if}}
+%\newcommand{\Endtry}{{\bf end try}}
+\newcommand{\Endtry}{\ENDFOR}
+\newcommand{\Exists}{\textbf{exists~}}  % text variant: do not use in models!
+%\newcommand{\Exists}{\exists}          % math variant: do not use in models!
+\newcommand{\ForAll}{\textbf{for~all~}} % text variant
+%\newcommand{\ForAll}{\forall}          % math variant
+\newcommand{\Function}{\textbf{function~}}
+\newcommand{\IfThen}[2]{\If#1\Then#2\EndIf}
+\newcommand{\In}{\textbf{~in~}} % text variant
+%\newcommand{\In}{\in}          % math variant
+\newcommand{\Integer}{\textbf{int}}
+\newcommand{\Invariant}[1]{{\bf invariant:} #1}
+\newcommand{\IsAssigned}{\gets}
+%\newcommand{\IsAssigned}{\coloneqq}
+\newcommand{\Of}{\textbf{~of~}}
+\newcommand{\Maximise}{\textbf{maximise}}
+\newcommand{\Minimise}{\textbf{minimise}}
+\newcommand{\PostCond}[1]{\textbf{post:} #1}
+\newcommand{\PreCond}[1]{\textbf{pre:} #1}
+\newcommand{\Procedure}{\textbf{procedure~}}
+\newcommand{\Return}{\textbf{return~}}
+\newcommand{\SetDecl}{\textbf{set~}}
+\newcommand{\SetOf}{\textbf{setof}}
+\newcommand{\Size}{\textbf{size}}
+\newcommand{\Solve}{\textbf{solve}}
+\newcommand{\SUM}[3]{\textbf{sum}(#1)~#3}             % text variant, ignores #2
+%\newcommand{\SUM}[3]{\displaystyle\sum_{#1}^{#2} #3} % math variant
+%\newcommand{\Try}[1]{\STATE {{\bf try}~#1}}
+%\newcommand{\Tryall}{{\bf try all}}
+\newcommand{\Tryall}{\FORALL}
+\newcommand{\Var}{\textbf{var~}}
+\newcommand{\Variant}[1]{{\bf variant:} #1}
