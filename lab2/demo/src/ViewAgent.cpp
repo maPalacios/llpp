@@ -13,13 +13,13 @@ ViewAgent::ViewAgent(Ped::Tagent * agent,QGraphicsScene * scene) :model(agent), 
   
   
 
-  rect =  scene->addRect(MainWindow::cellToPixel(pos.x),MainWindow::cellToPixel(pos.y),MainWindow::cellsizePixel-1 ,MainWindow::cellsizePixel-1 , outlinePen, blueBrush);
+  rect =  scene->addRect(MainWindow::cellToPixel(pos.pos[0]),MainWindow::cellToPixel(pos.pos[1]),MainWindow::cellsizePixel-1 ,MainWindow::cellsizePixel-1 , outlinePen, blueBrush);
 
 }
 
 
 void ViewAgent::paint(){
-  rect->setRect(MainWindow::cellToPixel(pos.x),MainWindow::cellToPixel(pos.y),MainWindow::cellsizePixel-1,MainWindow::cellsizePixel-1);
+  rect->setRect(MainWindow::cellToPixel(pos.pos[0]),MainWindow::cellToPixel(pos.pos[1]),MainWindow::cellsizePixel-1,MainWindow::cellsizePixel-1);
 
   //Todo: animate movement
 }

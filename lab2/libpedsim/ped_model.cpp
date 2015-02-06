@@ -5,6 +5,7 @@
 #include <iostream>
 
 
+
 #define SERIAL 1
 #define OPENMP 2
 #define PTHREADS 3;

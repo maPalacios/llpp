@@ -1,3 +1,4 @@
+
 //
 // pedsim - A microscopic pedestrian simulation system.
 // Copyright (c) 2003 - 2014 by Christian Gloor
@@ -21,8 +22,8 @@ Ped::Tagent::Tagent(double posX, double posY) {
 }
 
 void Ped::Tagent::init(int posX, int posY) {
-  position.x = posX;
-  position.y = posY;
+  position.pos[0] = posX;
+  position.pos[1] = posY;
   destination = NULL;
   lastDestination = NULL;
 }
@@ -34,8 +35,8 @@ void Ped::Tagent::whereToGo() {
 void Ped::Tagent::go() {
   Tvector moveForce = waypointForce;
   
-  position.x = round(position.x + moveForce.x);
-  position.y = round(position.y + moveForce.y);
+  position.pos[0] = round(position.pos[0] + moveForce.pos[0]);
+  position.pos[1] = round(position.pos[1] + moveForce.pos[1]);
 }
 
 void Ped::Tagent::addWaypoint(Twaypoint* wp) {
@@ -94,10 +95,9 @@ Ped::Tvector Ped::Tagent::computeDirection() {
     Twaypoint tempDestination(destination->getx(), destination->gety(), destination->getr());
     
     tempDestination.settype(Ped::Twaypoint::TYPE_POINT);
-    direction = tempDestination.getForce(position.x, position.y, 0, 0, &reachesDestination);
-  }
-  else {
-    direction = destination->getForce(position.x, position.y,
+    direction = tempDestination.getForce(position.pos[0], position.pos[1], 0, 0, &reachesDestination);
+  }  else {
+    direction = destination->getForce(position.pos[0], position.pos[1],
 				      lastDestination->getx(),
 				      lastDestination->gety(),
 				      &reachesDestination);
