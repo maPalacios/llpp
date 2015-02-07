@@ -8,7 +8,7 @@
 //
 #include "ped_agent.h"
 #include "ped_waypoint.h"
-
+#include <nmmintrin.h>
 #include <math.h>
 
 
@@ -34,9 +34,12 @@ void Ped::Tagent::whereToGo() {
 
 void Ped::Tagent::go() {
   Tvector moveForce = waypointForce;
-  
-  position.pos[0] = round(position.pos[0] + moveForce.pos[0]);
-  position.pos[1] = round(position.pos[1] + moveForce.pos[1]);
+
+    __m128d *p = (__m128d*)position.pos;
+    *p = _mm_add_pd(*p, *(__m128d*)moveForce.pos);
+
+  // position.pos[0] = round(position.pos[0] + moveForce.pos[0]);
+    //  position.pos[1] = round(position.pos[1] + moveForce.pos[1]);
 }
 
 void Ped::Tagent::addWaypoint(Twaypoint* wp) {
