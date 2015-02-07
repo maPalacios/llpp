@@ -24,26 +24,20 @@ namespace Ped {
         // Default constructor
         Tvector();
 	Tvector(const Tvector& other){
-	  pos = new double[3];
 	  pos[0] = other.pos[0];
 	  pos[1] = other.pos[1];
 	  pos[2] = other.pos[2];
 	}
 	Tvector & operator=(const Tvector other) {
-	  pos = new double[3];
 	  pos[0] = other.pos[0];
 	  pos[1] = other.pos[1];
 	  pos[2] = other.pos[2];
 	  return *this;
 	}
 
-	~Tvector(){
-	  delete pos;
-	}
 
         // Initializing constructor
         Tvector(double px, double py, double pz = 0) {
-	  pos = new double[3];
 	  pos[0] = px;
 	  pos[1] = py;
 	  pos[2] = pz;
@@ -87,7 +81,7 @@ namespace Ped {
 
 
         // Attributes
-	double *pos;
+	double pos[3];
 
     };
 }

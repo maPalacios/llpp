@@ -11,7 +11,6 @@
 /// Default constructor, which makes sure that all the values are set to 0.
 /// \date    2012-01-16
 Ped::Tvector::Tvector() {
-  pos = new double[3];
   pos[0] = 0;
   pos[1] = 0;
   pos[2] = 0;
