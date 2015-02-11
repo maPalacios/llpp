@@ -18,7 +18,15 @@ namespace Ped{
     int par;
     int np;
     IMPLEMENTATION implementation;
-    std::vector<Tagent*> agents;
+    double *Ax; // x-position of agent
+    double *Ay; // y-position of agent
+    double *Az; // z-position of agent
+
+    double *Wx; // x-position of waypoint
+    double *Wy; // y-position of waypoint
+    double *Wz; // z-position of waypoint
+    
+    Vector<Waypoint> *waypointlist;
   };
 }
 #endif
