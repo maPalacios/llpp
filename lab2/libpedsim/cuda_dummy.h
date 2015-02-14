@@ -1,6 +1,6 @@
 #ifndef _tick_cuda_h_
 #define _tick_cuda_h_
-
+#include "ped_agent.h"
 #include <iostream>
 /**
  * These functions are placeholders for your functions 
@@ -11,7 +11,7 @@
  * You should only care if you want to compile on a non-CUDA machine.
  */
 
-void __attribute__((weak)) whereToGoCUDA() {
+void __attribute__((weak)) whereToGoCUDA(vector<Ped::Tagent*> *agents) {
   std::cerr << "Notice: calling a dummy function" << __FUNCTION__ << std::endl;
 }
 

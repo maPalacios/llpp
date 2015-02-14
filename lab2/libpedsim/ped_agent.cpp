@@ -1,4 +1,3 @@
-
 //
 // pedsim - A microscopic pedestrian simulation system.
 // Copyright (c) 2003 - 2014 by Christian Gloor
@@ -8,38 +7,22 @@
 //
 #include "ped_agent.h"
 #include "ped_waypoint.h"
-#include <nmmintrin.h>
+#include <iostream>
 #include <math.h>
 
+using namespace std;
 
+void Ped::Tagent::setX(double nx) { *x = nx; }
+void Ped::Tagent::setY(double ny) { *y = ny; }
 
-Ped::Tagent::Tagent(int posX, int posY) {
-  Ped::Tagent::init(posX, posY);
-}
-
-Ped::Tagent::Tagent(double posX, double posY) {
-  Ped::Tagent::init((int) round(posX), (int) round(posY));
-}
-
-void Ped::Tagent::init(int posX, int posY) {
-  position.pos[0] = posX;
-  position.pos[1] = posY;
-  destination = NULL;
-  lastDestination = NULL;
-}
 
 void Ped::Tagent::whereToGo() {
   computeForces();
 }
 
 void Ped::Tagent::go() {
-  Tvector moveForce = waypointForce;
-
-    __m128d *p = (__m128d*)position.pos;
-    *p = _mm_add_pd(*p, *(__m128d*)moveForce.pos);
-
-  // position.pos[0] = round(position.pos[0] + moveForce.pos[0]);
-    //  position.pos[1] = round(position.pos[1] + moveForce.pos[1]);
+  *x = round(*x + waypointForce.x);
+  *y = round(*y + waypointForce.y);
 }
 
 void Ped::Tagent::addWaypoint(Twaypoint* wp) {
@@ -51,7 +34,7 @@ bool Ped::Tagent::removeWaypoint(const Twaypoint* wp) {
     destination = NULL;
   if (lastDestination == wp)
     lastDestination = NULL;
-  
+
   bool removed = false;
   for (int i = waypoints.size(); i > 0; --i) {
     Twaypoint* currentWaypoint = waypoints.front();
@@ -61,14 +44,14 @@ bool Ped::Tagent::removeWaypoint(const Twaypoint* wp) {
       removed = true;
     }
   }
-  
+
   return removed;
 }
 
 void Ped::Tagent::clearWaypoints() {
   destination = NULL;
   lastDestination = NULL;
-  
+
   for (int i = waypoints.size(); i > 0; --i) {
     waypoints.pop_front();
   }
@@ -96,11 +79,12 @@ Ped::Tvector Ped::Tagent::computeDirection() {
   bool reachesDestination = false; // if agent reaches destination in n
   if (lastDestination == NULL) {
     Twaypoint tempDestination(destination->getx(), destination->gety(), destination->getr());
-    
+
     tempDestination.settype(Ped::Twaypoint::TYPE_POINT);
-    direction = tempDestination.getForce(position.pos[0], position.pos[1], 0, 0, &reachesDestination);
-  }  else {
-    direction = destination->getForce(position.pos[0], position.pos[1],
+    direction = tempDestination.getForce(*x, *y, 0, 0, &reachesDestination);
+  }
+  else {
+    direction = destination->getForce(*x, *y,
 				      lastDestination->getx(),
 				      lastDestination->gety(),
 				      &reachesDestination);
@@ -111,7 +95,7 @@ Ped::Tvector Ped::Tagent::computeDirection() {
     // Circular waypoint chasing
     waypoints.push_back(destination);
 
-    
+
     lastDestination = destination;
     destination = NULL;
   }
@@ -125,8 +109,15 @@ Ped::Twaypoint* Ped::Tagent::getNextDestination() {
     nextDestination = destination; // agent hasn't arrived yet
   }
   else if (!waypoints.empty()) {
+    *lwpx = *wpx;
+    *lwpy = *wpy;
     nextDestination = getNextWaypoint();
+
+    *wpx = nextDestination->getx();
+    *wpy = nextDestination->gety();
+    *wpr = nextDestination->getr();
   }
+
   return nextDestination;
 }
 

@@ -13,7 +13,8 @@ class ViewAgent{
 
  private:
   const Ped::Tagent * model ;
-  const Ped::Tvector &pos;
+  double *x;
+  double *y;
   QGraphicsRectItem * rect;
 
  };

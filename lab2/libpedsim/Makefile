@@ -28,11 +28,11 @@ CXX=$(CXX_)
 CXXFLAGS = $(CXXFLAGS_)
 LDFLAGS = $(LDFLAGS_)
 OBJECTS =  $(OBJECTS_CXX)
-else 
+else
 # Compile everything with nvcc. nvcc calls system default c++ compiler for the host code.
 # Make shared library directly with default c+++ compiler, makes format compatability more likely, and life more easy.
 CXX = $(NVCC)
-CXXFLAGS = -arch sm_30 -rdc=true --compiler-options "$(CXXFLAGS_)"
+CXXFLAGS = -arch sm_20 -rdc=true --compiler-options "$(CXXFLAGS_)"
 LDFLAGS = --shared #--compiler-options "$(LDFLAGS_)"
 OBJECTS =  prelinked_objects.o  $(OBJECTS_CU) $(OBJECTS_CXX)
 endif
@@ -40,13 +40,13 @@ endif
 
 
 libpedsim.so: $(OBJECTS)
-	$(CXX_) $(LDFLAGS_) $(OBJECTS) -o libpedsim.so 
+	$(CXX_) $(LDFLAGS_) $(OBJECTS) -o libpedsim.so
 
 %.cu.o: %.cu
-	$(NVCC) $(CXXFLAGS) -c $< -o $@ 
+	$(NVCC) $(CXXFLAGS) -c $< -o $@
 
 %.cxx.o: %.cpp
-	$(CXX) $(CXXFLAGS)  -c $< -o $@ 
+	$(CXX) $(CXXFLAGS)  -c $< -o $@
 
 # We need to do some linking beforehand, so that non-cuda compilers can link to the lib
 # If the program were using nvcc, this step would be unneccesary

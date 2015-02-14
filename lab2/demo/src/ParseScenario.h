@@ -6,6 +6,9 @@
 // Adapted for Low Level Parallel Programming 2015
 //
 
+
+
+
 #ifndef _parsescenario_h_
 #define _parsescenario_h_
 
@@ -15,6 +18,10 @@
 #include <QXmlStreamReader>
 #include <vector>
 
+struct CUDA_DATA{
+  double * ax,*ay, *wpx, *wpy, *wpr, *lwpx, *lwpy;
+};
+
 using namespace std;
 
 class ParseScenario : public QObject
@@ -22,12 +29,17 @@ class ParseScenario : public QObject
   Q_OBJECT
 
 public:
-  ParseScenario(QString file);
-  vector<Ped::Tagent*> getAgents() const; 
+  ParseScenario(QString file, CUDA_DATA *dat);
+  vector<Ped::Tagent*> getAgents() const;
 
   private slots:
-  void processXmlLine(QByteArray data);
-	
+  void processXmlLine(QByteArray data, CUDA_DATA *dat);
+
+
+
+
+
+
 private:
   QXmlStreamReader xmlReader;
 
@@ -36,9 +48,9 @@ private:
   vector<Ped::Tagent*> tempAgents;
 
   void handleWaypoint();
-  void handleAgent();
+  void handleAgent(CUDA_DATA *dat);
   void handleAddWaypoint();
-  void handleXmlStartElement();
+  void handleXmlStartElement(CUDA_DATA *dat);
   void handleXmlEndElement();
 
   QString readString(const QString &tag);

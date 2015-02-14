@@ -8,10 +8,12 @@
 
 #include "ParseScenario.h"
 #include <string>
+#include <iostream>
+
 
 /// object constructor
 /// \date    2011-01-03
-ParseScenario::ParseScenario(QString filename) : QObject(0)
+ParseScenario::ParseScenario(QString filename, CUDA_DATA *data) : QObject(0)
 {
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -22,7 +24,7 @@ ParseScenario::ParseScenario(QString filename) : QObject(0)
   while (!file.atEnd())
   {
     QByteArray line = file.readLine();
-    processXmlLine(line);
+    processXmlLine(line,data);
   }
 }
 
@@ -32,7 +34,7 @@ vector<Ped::Tagent*> ParseScenario::getAgents() const
 }
 
 /// Called for each line in the file
-void ParseScenario::processXmlLine(QByteArray dataLine)
+void ParseScenario::processXmlLine(QByteArray dataLine,CUDA_DATA *data)
 {
   xmlReader.addData(dataLine);
 
@@ -41,7 +43,7 @@ void ParseScenario::processXmlLine(QByteArray dataLine)
     xmlReader.readNext();
     if (xmlReader.isStartElement())
     {
-      handleXmlStartElement();
+      handleXmlStartElement(data);
     }
     else if (xmlReader.isEndElement())
     {
@@ -50,15 +52,15 @@ void ParseScenario::processXmlLine(QByteArray dataLine)
   }
 }
 
-void ParseScenario::handleXmlStartElement()
+void ParseScenario::handleXmlStartElement(CUDA_DATA *data)
 {
   if (xmlReader.name() == "waypoint")
   {
-    handleWaypoint();	
+    handleWaypoint();
   }
   else if (xmlReader.name() == "agent")
   {
-    handleAgent();
+    handleAgent(data);
   }
   else if (xmlReader.name() == "addwaypoint")
   {
@@ -87,12 +89,12 @@ void ParseScenario::handleWaypoint()
   double x = readDouble("x");
   double y = readDouble("y");
   double r = readDouble("r");
-  
+
   Ped::Twaypoint *w = new Ped::Twaypoint(x, y, r);
   waypoints[id] = w;
 }
 
-void ParseScenario::handleAgent()
+void ParseScenario::handleAgent(CUDA_DATA *data)
 {
   double x = readDouble("x");
   double y = readDouble("y");
@@ -100,14 +102,20 @@ void ParseScenario::handleAgent()
   double dx = readDouble("dx");
   double dy = readDouble("dy");
 
+
+  int getNum = tempAgents.size();
+  std::cout << getNum << std::endl;
   tempAgents.clear();
+
   for (int i = 0; i < n; ++i)
   {
-    int xPos = x + qrand()/(RAND_MAX/dx) -dx/2;
-    int yPos = y + qrand()/(RAND_MAX/dy) -dy/2;
-    Ped::Tagent *a = new Ped::Tagent(xPos, yPos);
+    (data->ax)[getNum+i] = x + qrand()/(RAND_MAX/dx) -dx/2;
+    (data->ay)[getNum+i] = y + qrand()/(RAND_MAX/dy) -dy/2;
+
+    Ped::Tagent *a = new Ped::Tagent(&(data->ax)[getNum+i],&(data->ay)[getNum+i], &(data->wpx)[getNum+i], &(data->wpy)[getNum+i], &(data->wpr)[getNum+i], &(data->lwpx)[getNum+i], &(data->lwpy)[getNum+i]);
     tempAgents.push_back(a);
   }
+
 }
 
 void ParseScenario::handleAddWaypoint()

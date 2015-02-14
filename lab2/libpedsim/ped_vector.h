@@ -13,7 +13,7 @@
 #endif
 
 #include <string>
-#include <iostream>
+
 namespace Ped {
     /// Vector helper class. This is basically a struct with some related functions attached.
     /// x, y, and z are public, so that they can be accessed easily.
@@ -23,26 +23,9 @@ namespace Ped {
     public:
         // Default constructor
         Tvector();
-	Tvector(const Tvector& other){
-	  pos[0] = other.pos[0];
-	  pos[1] = other.pos[1];
-	  pos[2] = other.pos[2];
-	}
-	Tvector & operator=(const Tvector other) {
-	  pos[0] = other.pos[0];
-	  pos[1] = other.pos[1];
-	  pos[2] = other.pos[2];
-	  return *this;
-	}
-
 
         // Initializing constructor
-        Tvector(double px, double py, double pz = 0) {
-	  pos[0] = px;
-	  pos[1] = py;
-	  pos[2] = pz;
-	};
-
+        Tvector(double px, double py, double pz = 0) : x(px), y(py), z(pz) {};
 
 
         // Methods
@@ -67,7 +50,7 @@ namespace Ped {
 
         std::string to_string() const;
 
-	
+
         // Operators
         Tvector operator+(const Tvector& other) const;
         Tvector operator-(const Tvector& other) const;
@@ -81,8 +64,9 @@ namespace Ped {
 
 
         // Attributes
-	double pos[3];
-
+        double x;
+        double y;
+        double z;
     };
 }
 

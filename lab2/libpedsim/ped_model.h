@@ -15,18 +15,9 @@ namespace Ped{
     void tick();
     const std::vector<Tagent*> getAgents() const;
   private:
-    int par;
     int np;
     IMPLEMENTATION implementation;
-    double *Ax; // x-position of agent
-    double *Ay; // y-position of agent
-    double *Az; // z-position of agent
-
-    double *Wx; // x-position of waypoint
-    double *Wy; // y-position of waypoint
-    double *Wz; // z-position of waypoint
-    
-    Vector<Waypoint> *waypointlist;
+    std::vector<Tagent*> agents;
   };
 }
 #endif

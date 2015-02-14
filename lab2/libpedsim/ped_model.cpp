@@ -2,26 +2,22 @@
 #include "ped_waypoint.h"
 #include "cuda_dummy.h"
 #include <pthread.h>
+#include <nmmintrin.h>
 #include <iostream>
 
-
-
-#define SERIAL 1
-#define OPENMP 2
-#define PTHREADS 3;
-
+enum IMPLEMENTATION {CUDA, VECTOR, OMP, PTHREAD, SEQ};
 struct interval {
   int left, right;
   std::vector<Ped::Tagent*> *agents;
 };
 
 void Ped::Model::setPar(int inPar, int numProcs){
-  par = inPar;
+  implementation = (IMPLEMENTATION)inPar;
   np = numProcs;
 }
 
 int Ped::Model::getPar(){
-  return par;
+  return implementation;
 }
 
 int Ped::Model::getNumProcs(){
@@ -72,10 +68,53 @@ void Ped::Model::tick(){
       agents[i]->whereToGo();
       agents[i]->go();
     }
-  } else {
+  } else if (getPar() == SEQ) {
     for(int i=0;i<numAgents;i++){
       agents[i]->whereToGo();
       agents[i]->go();
     }
+  }
+  else if (getPar() == CUDA){
+    whereToGoCUDA(&agents);
+  } else if (getPar() == VECTOR){
+    for(int i=0;i<numAgents;i+=2){
+
+      __m128d *x = (__m128d*)agents[i]->getPosX();
+      __m128d *y = (__m128d*)agents[i]->getPosY();
+      __m128d *wx = (__m128d*)agents[i]->getPosWX();
+      __m128d *wy = (__m128d*)agents[i]->getPosWY();
+      __m128d *wr = (__m128d*)agents[i]->getPosWR();
+      __m128d *lwx = (__m128d*)agents[i]->getPosLWX();
+      __m128d *lwy = (__m128d*)agents[i]->getPosLWY();
+      __m128d diffx, diffy, length, diffpx, diffpy, dist;
+
+      diffx = _mm_sub_pd(*wx, *lwx);
+      diffy = _mm_sub_pd(*wy, *lwy);
+      diffpx = _mm_sub_pd(*x, *wx);
+      diffpy = _mm_sub_pd(*y, *wy);
+      dist = _mm_add_pd(_mm_mul_pd(diffpx, diffpx), _mm_mul_pd(diffpy, diffpy));
+
+      double dres[2];
+      __m128d *res = (__m128d*)dres;
+
+
+      *res = _mm_sub_pd(dist, _mm_mul_pd(*wr,*wr));
+
+      if (dres[0] > 0 && dres[1] > 0){
+        length = _mm_add_pd(_mm_mul_pd(diffx, diffx), _mm_mul_pd(diffy, diffy));
+        length = _mm_sqrt_pd(length);
+        *x = _mm_add_pd(*x, _mm_div_pd(diffx,length));
+        *y = _mm_add_pd(*y, _mm_div_pd(diffy,length));
+
+      } else {
+        agents[i]->whereToGo();
+        agents[i]->go();
+        agents[i+1]->whereToGo();
+        agents[i+1]->go();
+      }
+    }
+
+
+
   }
 }

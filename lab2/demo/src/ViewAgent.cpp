@@ -4,22 +4,22 @@
 
 #include <QGraphicsItemAnimation>
 
-ViewAgent::ViewAgent(Ped::Tagent * agent,QGraphicsScene * scene) :model(agent), pos(agent->getPosition()) 
+ViewAgent::ViewAgent(Ped::Tagent * agent,QGraphicsScene * scene) :model(agent), x(agent->getPosX()), y(agent->getPosY())
 {
 
   QBrush blueBrush(Qt::green);
   QPen outlinePen(Qt::black);
   outlinePen.setWidth(2);
-  
-  
 
-  rect =  scene->addRect(MainWindow::cellToPixel(pos.pos[0]),MainWindow::cellToPixel(pos.pos[1]),MainWindow::cellsizePixel-1 ,MainWindow::cellsizePixel-1 , outlinePen, blueBrush);
+
+
+  rect =  scene->addRect(MainWindow::cellToPixel(*x),MainWindow::cellToPixel(*y),MainWindow::cellsizePixel-1 ,MainWindow::cellsizePixel-1 , outlinePen, blueBrush);
 
 }
 
 
 void ViewAgent::paint(){
-  rect->setRect(MainWindow::cellToPixel(pos.pos[0]),MainWindow::cellToPixel(pos.pos[1]),MainWindow::cellsizePixel-1,MainWindow::cellsizePixel-1);
+  rect->setRect(MainWindow::cellToPixel(*x),MainWindow::cellToPixel(*y),MainWindow::cellsizePixel-1,MainWindow::cellsizePixel-1);
 
   //Todo: animate movement
 }

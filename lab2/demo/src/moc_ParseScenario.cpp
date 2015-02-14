@@ -30,13 +30,14 @@ static const uint qt_meta_data_ParseScenario[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      20,   15,   14,   14, 0x08,
+      24,   15,   14,   14, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_ParseScenario[] = {
-    "ParseScenario\0\0data\0processXmlLine(QByteArray)\0"
+    "ParseScenario\0\0data,dat\0"
+    "processXmlLine(QByteArray,CUDA_DATA*)\0"
 };
 
 void ParseScenario::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -45,7 +46,7 @@ void ParseScenario::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         Q_ASSERT(staticMetaObject.cast(_o));
         ParseScenario *_t = static_cast<ParseScenario *>(_o);
         switch (_id) {
-        case 0: _t->processXmlLine((*reinterpret_cast< QByteArray(*)>(_a[1]))); break;
+        case 0: _t->processXmlLine((*reinterpret_cast< QByteArray(*)>(_a[1])),(*reinterpret_cast< CUDA_DATA*(*)>(_a[2]))); break;
         default: ;
         }
     }

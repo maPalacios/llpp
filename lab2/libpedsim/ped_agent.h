@@ -11,7 +11,7 @@
 
 // g++ does not understand cuda stuff. This makes it ignore them. (use this if you want)
 #ifndef __CUDACC__
-#define __device__ 
+#define __device__
 #define __host__
 #endif
 
@@ -26,19 +26,39 @@ namespace Ped {
 
   class Tagent {
   public:
-    Tagent(int posX, int posY);
-    Tagent(double posX, double posY);
+    Tagent(double *posX, double *posY, double *wpX, double * wpY, double *wpR, double *lwpX, double * lwpY){
+      x = posX; y= posY; wpx = wpX; wpy = wpY; wpr = wpR, lwpx = lwpX, lwpy = lwpY;
+      *wpx = *x;
+      *wpy = *y;
+      *lwpx = *x;
+      *lwpy = *y;
+      *wpr = 5;
+
+      destination = NULL; lastDestination = NULL;
+    };
+
 
 
     // Computes forces that determine the next position
     void whereToGo();
+    void whereToGoCUDA();
 
     // Update the position according to computed forces
     void go();
 
-    const Tvector& getPosition() const { return position; }
-    double getX() const { return position.pos[0]; };
-    double getY() const { return position.pos[1]; };
+//    const Tvector& getPosition() const { pos = Tvector(*x, *y, 0); return &pos;}
+    double getX() const { return *x; };
+    double getY() const { return *y; };
+    double* getPosX() const { return x; };
+    double* getPosY() const { return y; };
+    void setX(double nx);
+    void setY(double ny);
+    double* getPosWX() const { return wpx; };
+    double* getPosWY() const { return wpy; };
+    double* getPosWR() const { return wpr; };
+    double* getPosLWX() const { return lwpx; };
+    double* getPosLWY() const { return lwpy; };
+
 
     void addWaypoint(Twaypoint* wp);
     bool removeWaypoint(const Twaypoint* wp);
@@ -47,32 +67,29 @@ namespace Ped {
 
     bool reachedDestination() { return (destination == NULL); };
 
-    
+    Twaypoint* getNextDestination();
   private:
     Tagent() {};
-    
+
+    double *x, *y, *wpx, *wpy, *wpr, *lwpx, *lwpy;
+
     // The current position
-    Tvector position;
 
     Twaypoint* destination;
     Twaypoint* lastDestination;
 
     deque<Twaypoint*> waypoints;
     int waypointBehavior;
-
-    // The force towards the current destination
+    Tvector pos;
     Tvector waypointForce;
+    // The force towards the current destination
 
    // Computes the forces that determine the next position
     void computeForces();
-    
-    // Interntal init function 
-    void init(int posX, int posY);
 
     // Computing waypoint force and directions
     Tvector computeWaypointForce();
     Tvector computeDirection();
-    Twaypoint* getNextDestination();
     Twaypoint* getNextWaypoint();
   };
 }

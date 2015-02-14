@@ -20,6 +20,7 @@
 enum IMPLEMENTATION {CUDA, VECTOR, OMP, PTHREAD, SEQ};
 
 
+
 int main(int argc, char*argv[]) {
   Ped::Model model;
   bool timing_mode = 0;
@@ -44,6 +45,14 @@ int main(int argc, char*argv[]) {
 	    par = PTHREAD;
 	    cout << "Using pthreads parallelisation.\n";
 	    }
+	  else if(strcmp(&argv[i][2],"cuda") == 0){
+	    par = CUDA;
+	    cout << "Using CUDA parallelisation.\n";
+	    }
+	  else if(strcmp(&argv[i][2],"vector") == 0 || strcmp(&argv[i][2],"simd") == 0){
+	    par = VECTOR;
+	    cout << "Using vector parallelisation.\n";
+	    }
     else if(strcmp(&argv[i][2],"np") == 0){
       i++;
       if (i < argc)
@@ -60,9 +69,20 @@ int main(int argc, char*argv[]) {
 	}
       i+=1;
     }
-  ParseScenario parser(scenefile);
+
+  CUDA_DATA data;
+  data.ax = (double*)malloc(sizeof(double)*2048);
+  data.ay = (double*)malloc(sizeof(double)*2048);
+  data.wpx = (double*)malloc(sizeof(double)*2048);
+  data.wpy = (double*)malloc(sizeof(double)*2048);
+  data.wpr = (double*)malloc(sizeof(double)*2048);
+  data.lwpx = (double*)malloc(sizeof(double)*2048);
+  data.lwpy = (double*)malloc(sizeof(double)*2048);
+  ParseScenario parser(scenefile, &data);
+
   model.setup(parser.getAgents());
   model.setPar(par, np);
+
   QApplication app(argc, argv);
 
   MainWindow mainwindow(model);
@@ -82,7 +102,7 @@ int main(int argc, char*argv[]) {
   else
     {
       timer = new Timer(model,mainwindow,delay_ms);
-      mainwindow.show();
+     mainwindow.show();
 
     }
   cout << "Demo setup complete, running ..." << endl;
