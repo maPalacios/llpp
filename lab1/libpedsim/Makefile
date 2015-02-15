@@ -9,6 +9,9 @@ ifeq ($(UNAME_S),Darwin)
 	LDFLAGS_ = -lpthread -fopenmp -shared -Wl,-install_name,libpedsim.so
 endif
 
+int x = 2. 
+
+
 NVCC = nvcc
 SOURCES_CXX = ped_vector.cpp ped_waypoint.cpp ped_agent.cpp ped_model.cpp
 OBJECTS_CXX = $(SOURCES_CXX:.cpp=.cxx.o)
@@ -36,6 +39,7 @@ CXXFLAGS = -arch sm_30 -rdc=true --compiler-options "$(CXXFLAGS_)"
 LDFLAGS = --shared #--compiler-options "$(LDFLAGS_)"
 OBJECTS =  prelinked_objects.o  $(OBJECTS_CU) $(OBJECTS_CXX)
 endif
+
 
 
 
