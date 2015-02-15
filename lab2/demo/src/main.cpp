@@ -52,7 +52,7 @@ int main(int argc, char*argv[]) {
 	  else if(strcmp(&argv[i][2],"vector") == 0 || strcmp(&argv[i][2],"simd") == 0){
 	    par = VECTOR;
 	    cout << "Using vector parallelisation.\n";
-	    }
+    }
     else if(strcmp(&argv[i][2],"np") == 0){
       i++;
       if (i < argc)
@@ -69,15 +69,16 @@ int main(int argc, char*argv[]) {
 	}
       i+=1;
     }
-
+  int size = 24000;
   CUDA_DATA data;
-  data.ax = (double*)malloc(sizeof(double)*2048);
-  data.ay = (double*)malloc(sizeof(double)*2048);
-  data.wpx = (double*)malloc(sizeof(double)*2048);
-  data.wpy = (double*)malloc(sizeof(double)*2048);
-  data.wpr = (double*)malloc(sizeof(double)*2048);
-  data.lwpx = (double*)malloc(sizeof(double)*2048);
-  data.lwpy = (double*)malloc(sizeof(double)*2048);
+  data.ax = (double*)malloc(sizeof(double)*size);
+  data.ay = (double*)malloc(sizeof(double)*size);
+  data.wpx = (double*)malloc(sizeof(double)*size);
+  data.wpy = (double*)malloc(sizeof(double)*size);
+  data.wpr = (double*)malloc(sizeof(double)*size);
+  data.lwpx = (double*)malloc(sizeof(double)*size);
+  data.lwpy = (double*)malloc(sizeof(double)*size);
+  data.visited = (bool*)malloc(sizeof(bool)*size);
   ParseScenario parser(scenefile, &data);
 
   model.setup(parser.getAgents());
@@ -86,9 +87,6 @@ int main(int argc, char*argv[]) {
   QApplication app(argc, argv);
 
   MainWindow mainwindow(model);
-
-
-
 
   const int delay_ms = 100;
   Timer *timer;

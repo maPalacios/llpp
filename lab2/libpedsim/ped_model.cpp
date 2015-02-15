@@ -28,6 +28,10 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 {
   agents = agentsInScenario;
   implementation = SEQ;
+  for (int i=0;i<agents.size();i++){
+      agents[i]->whereToGo();
+    }
+
 }
 
 const std::vector<Ped::Tagent*> Ped::Model::getAgents() const
@@ -75,10 +79,12 @@ void Ped::Model::tick(){
     }
   }
   else if (getPar() == CUDA){
+
     whereToGoCUDA(&agents);
   } else if (getPar() == VECTOR){
-    for(int i=0;i<numAgents;i+=2){
-
+#pragma omp parallel for num_threads(np)
+    for(int i=0;i<numAgents-1;i+=2){
+      if (*(agents[i]->getVisited()) == true && *(agents[i+1]->getVisited()) == true){
       __m128d *x = (__m128d*)agents[i]->getPosX();
       __m128d *y = (__m128d*)agents[i]->getPosY();
       __m128d *wx = (__m128d*)agents[i]->getPosWX();
@@ -87,6 +93,7 @@ void Ped::Model::tick(){
       __m128d *lwx = (__m128d*)agents[i]->getPosLWX();
       __m128d *lwy = (__m128d*)agents[i]->getPosLWY();
       __m128d diffx, diffy, length, diffpx, diffpy, dist;
+
 
       diffx = _mm_sub_pd(*wx, *lwx);
       diffy = _mm_sub_pd(*wy, *lwy);
@@ -97,7 +104,6 @@ void Ped::Model::tick(){
       double dres[2];
       __m128d *res = (__m128d*)dres;
 
-
       *res = _mm_sub_pd(dist, _mm_mul_pd(*wr,*wr));
 
       if (dres[0] > 0 && dres[1] > 0){
@@ -105,16 +111,19 @@ void Ped::Model::tick(){
         length = _mm_sqrt_pd(length);
         *x = _mm_add_pd(*x, _mm_div_pd(diffx,length));
         *y = _mm_add_pd(*y, _mm_div_pd(diffy,length));
-
       } else {
+          agents[i]->whereToGo();
+          agents[i]->go();
+          agents[i+1]->whereToGo();
+          agents[i+1]->go();
+      }
+    } else {
         agents[i]->whereToGo();
         agents[i]->go();
         agents[i+1]->whereToGo();
         agents[i+1]->go();
-      }
     }
 
-
-
+    }
   }
 }

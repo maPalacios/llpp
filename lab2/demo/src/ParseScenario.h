@@ -20,7 +20,9 @@
 
 struct CUDA_DATA{
   double * ax,*ay, *wpx, *wpy, *wpr, *lwpx, *lwpy;
+  bool *visited;
 };
+
 
 using namespace std;
 

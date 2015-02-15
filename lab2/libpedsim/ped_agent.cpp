@@ -98,6 +98,7 @@ Ped::Tvector Ped::Tagent::computeDirection() {
 
     lastDestination = destination;
     destination = NULL;
+    *visited = true;
   }
 
   return direction;

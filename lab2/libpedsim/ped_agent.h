@@ -26,14 +26,10 @@ namespace Ped {
 
   class Tagent {
   public:
-    Tagent(double *posX, double *posY, double *wpX, double * wpY, double *wpR, double *lwpX, double * lwpY){
+    Tagent(double *posX, double *posY, double *wpX, double * wpY, double *wpR, double *lwpX, double * lwpY, bool*vis){
       x = posX; y= posY; wpx = wpX; wpy = wpY; wpr = wpR, lwpx = lwpX, lwpy = lwpY;
-      *wpx = *x;
-      *wpy = *y;
-      *lwpx = *x;
-      *lwpy = *y;
-      *wpr = 5;
-
+      visited = vis;
+      *visited = false;
       destination = NULL; lastDestination = NULL;
     };
 
@@ -58,7 +54,7 @@ namespace Ped {
     double* getPosWR() const { return wpr; };
     double* getPosLWX() const { return lwpx; };
     double* getPosLWY() const { return lwpy; };
-
+    bool* getVisited() const { return visited; };
 
     void addWaypoint(Twaypoint* wp);
     bool removeWaypoint(const Twaypoint* wp);
@@ -72,7 +68,7 @@ namespace Ped {
     Tagent() {};
 
     double *x, *y, *wpx, *wpy, *wpr, *lwpx, *lwpy;
-
+    bool * visited;
     // The current position
 
     Twaypoint* destination;

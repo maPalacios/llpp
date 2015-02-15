@@ -112,7 +112,7 @@ void ParseScenario::handleAgent(CUDA_DATA *data)
     (data->ax)[getNum+i] = x + qrand()/(RAND_MAX/dx) -dx/2;
     (data->ay)[getNum+i] = y + qrand()/(RAND_MAX/dy) -dy/2;
 
-    Ped::Tagent *a = new Ped::Tagent(&(data->ax)[getNum+i],&(data->ay)[getNum+i], &(data->wpx)[getNum+i], &(data->wpy)[getNum+i], &(data->wpr)[getNum+i], &(data->lwpx)[getNum+i], &(data->lwpy)[getNum+i]);
+    Ped::Tagent *a = new Ped::Tagent(&(data->ax)[getNum+i],&(data->ay)[getNum+i], &(data->wpx)[getNum+i], &(data->wpy)[getNum+i], &(data->wpr)[getNum+i], &(data->lwpx)[getNum+i], &(data->lwpy)[getNum+i], &(data->visited)[getNum+i]);
     tempAgents.push_back(a);
   }
 
