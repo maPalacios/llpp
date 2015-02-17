@@ -2,6 +2,10 @@
 #include "ped_model.h"
 #include "MainWindow.h"
 #include "ParseScenario.h"
+#include "Parser/ParseNumOfAgents.h"
+#include "Parser/tinyxml.h"
+#include <string>
+
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -26,6 +30,7 @@ int main(int argc, char*argv[]) {
   bool timing_mode = 0;
   int i = 1;
   QString scenefile = "scenario.xml";
+  string scenefileString = "scenario.xml"; 
   int par = SEQ;
   int np = 1;
   // 1.02
@@ -66,10 +71,12 @@ int main(int argc, char*argv[]) {
       else // Assume it is a path to scenefile
 	{
 	  scenefile = argv[i];
+          scenefileString = argv[i]; //(under scenefile = argv[i];)
 	}
       i+=1;
     }
-  int size = 24000;
+  ParseNumOfAgents numOfAgent(scenefileString.c_str());
+  int size = numOfAgent.getNumOfAgents();
   CUDA_DATA data;
   data.ax = (double*)malloc(sizeof(double)*size);
   data.ay = (double*)malloc(sizeof(double)*size);

@@ -113,6 +113,7 @@ void whereToGoCUDA(vector<Tagent*> *agents){
 	cudaFree(lwy);
 	cudaFree(lwx);
 	cudaFree(reached);
+	cudaFree(visited);
 
 	free(hreached);
 }
