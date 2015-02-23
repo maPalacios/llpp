@@ -32,7 +32,7 @@ else
 # Compile everything with nvcc. nvcc calls system default c++ compiler for the host code.
 # Make shared library directly with default c+++ compiler, makes format compatability more likely, and life more easy.
 CXX = $(NVCC)
-CXXFLAGS = -arch sm_20 -rdc=true --compiler-options "$(CXXFLAGS_)"
+CXXFLAGS = -arch sm_20 -std=c++11 -rdc=true --compiler-options "$(CXXFLAGS_)"
 LDFLAGS = --shared #--compiler-options "$(LDFLAGS_)"
 OBJECTS =  prelinked_objects.o  $(OBJECTS_CU) $(OBJECTS_CXX)
 endif

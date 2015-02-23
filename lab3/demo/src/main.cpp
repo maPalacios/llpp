@@ -5,7 +5,7 @@
 #include "Parser/ParseNumOfAgents.h"
 #include "Parser/tinyxml.h"
 #include <string>
-
+#include <atomic>
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -87,6 +87,20 @@ int main(int argc, char*argv[]) {
   data.lwpy = (double*)malloc(sizeof(double)*size);
   data.visited = (bool*)malloc(sizeof(bool)*size);
   ParseScenario parser(scenefile, &data);
+
+        int WIDTH = 400;
+        int HEIGHT = 400;
+        atomic<bool> * rows[WIDTH];
+        for (int i=0;i<WIDTH;i++){
+          rows[i] = (atomic<bool>*)malloc(sizeof(atomic<bool>)*HEIGHT);
+        }
+        for (int i=0;i<WIDTH;i++)
+          for (int j=0;j<HEIGHT;j++)
+            rows[i][j] = false;
+    
+        model.grid = rows;
+
+
 
   model.setup(parser.getAgents());
   model.setPar(par, np);
