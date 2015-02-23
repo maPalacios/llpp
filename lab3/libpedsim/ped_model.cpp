@@ -60,14 +60,11 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 				data.wpx = (double*)malloc(sizeof(double)*size);
 				data.wpy = (double*)malloc(sizeof(double)*size);
 				data.wpr = (double*)malloc(sizeof(double)*size);
-				data.lwpx = (double*)malloc(sizeof(double)*size);
-				data.lwpy = (double*)malloc(sizeof(double)*size);
 				data.desx = (double*)malloc(sizeof(double)*size);
 				data.desy = (double*)malloc(sizeof(double)*size);
-				data.visited = (bool*)malloc(sizeof(bool)*size);
 				vector<Ped::Tagent*> newAgents;
 				for (int i = 0;i<size;i++){
-								Ped::Tagent * a = new Ped::Tagent( &(data.ax)[i],&(data.ay)[i],&(data.wpx)[i],&(data.wpy)[i],&(data.wpr)[i],&(data.lwpx)[i],&(data.lwpy)[i],&(data.desx)[i], &(data.desy)[i], &(data.visited)[i]);
+								Ped::Tagent * a = new Ped::Tagent( &(data.ax)[i],&(data.ay)[i],&(data.wpx)[i],&(data.wpy)[i],&(data.wpr)[i],&(data.desx)[i], &(data.desy)[i]);
 								*a = *(agents[i]);
 								newAgents.push_back(a);
 				}
@@ -140,24 +137,19 @@ void Ped::Model::tick(){
 				} else if (getPar() == VECTOR){
 #pragma omp parallel for num_threads(np)
 								for(int i=0;i<numAgents-1;i+=2){
-												if (*(agents[i]->getVisited()) == true && *(agents[i+1]->getVisited()) == true){
 																__m128d *x = (__m128d*)agents[i]->getPosX();
 																__m128d *y = (__m128d*)agents[i]->getPosY();
 																__m128d *wx = (__m128d*)agents[i]->getPosWX();
 																__m128d *wy = (__m128d*)agents[i]->getPosWY();
 																__m128d *wr = (__m128d*)agents[i]->getPosWR();
-																__m128d *lwx = (__m128d*)agents[i]->getPosLWX();
-																__m128d *lwy = (__m128d*)agents[i]->getPosLWY();
 																__m128d *desx = (__m128d*)agents[i]->getDesX();
 																__m128d *desy = (__m128d*)agents[i]->getDesY();
 																__m128d diffx, diffy, length, diffpx, diffpy, dist;
+																
 
-
-																diffx = _mm_sub_pd(*wx, *lwx);
-																diffy = _mm_sub_pd(*wy, *lwy);
-																diffpx = _mm_sub_pd(*x, *wx);
-																diffpy = _mm_sub_pd(*y, *wy);
-																dist = _mm_add_pd(_mm_mul_pd(diffpx, diffpx), _mm_mul_pd(diffpy, diffpy));
+																diffx = _mm_sub_pd(*wx, *x);
+																diffy = _mm_sub_pd(*wy, *y);
+																dist = _mm_add_pd(_mm_mul_pd(diffx, diffx), _mm_mul_pd(diffy, diffy));
 
 																double dres[2];
 																__m128d *res = (__m128d*)dres;
@@ -166,22 +158,17 @@ void Ped::Model::tick(){
 
 																if (dres[0] > 0 && dres[1] > 0){
 																				length = _mm_add_pd(_mm_mul_pd(diffx, diffx), _mm_mul_pd(diffy, diffy));
-																				length = _mm_sqrt_pd(*res);
-																				*desx = _mm_add_pd(*x, _mm_div_pd(diffx,length));
-																				*desy = _mm_add_pd(*y, _mm_div_pd(diffy,length));
+																				dist = _mm_sqrt_pd(dist);
+																				*desx = _mm_add_pd(*x, _mm_div_pd(diffx,dist));
+																				*desy = _mm_add_pd(*y, _mm_div_pd(diffy,dist));
+																				agents[i]->roundDes();
+																				agents[i+1]->roundDes();
 														} else {
 																				agents[i]->whereToGo();
 																				agents[i]->go();
 																				agents[i+1]->whereToGo();
 																				agents[i+1]->go();
 																}
-												} else {
-																agents[i]->whereToGo();
-																agents[i]->go();
-																agents[i+1]->whereToGo();
-																agents[i+1]->go();
-												}
-
 								}
 								callPartition();
 				}

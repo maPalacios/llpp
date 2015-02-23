@@ -14,7 +14,7 @@
 #define __device__
 #define __host__
 #endif
-
+#include <math.h>
 #include "ped_vector.h"
 #include <vector>
 #include <deque>
@@ -26,10 +26,8 @@ namespace Ped {
 
   class Tagent {
   public:
-    Tagent(double *posX, double *posY, double *wpX, double * wpY, double *wpR, double *lwpX, double * lwpY, double * desX, double * desY, bool*vis){
-      x = posX; y= posY; wpx = wpX; wpy = wpY; wpr = wpR, lwpx = lwpX, lwpy = lwpY, desx = desX, desy = desY;
-      visited = vis;
-      *visited = false;
+    Tagent(double *posX, double *posY, double *wpX, double * wpY, double *wpR, double * desX, double * desY){
+      x = posX; y= posY; wpx = wpX; wpy = wpY; wpr = wpR, desx = desX, desy = desY;
       destination = NULL; lastDestination = NULL;
     };
 
@@ -39,6 +37,7 @@ namespace Ped {
     void whereToGo();
     void whereToGoCUDA();
 
+	void roundDes() { *desx = round(*desx); *desy = round(*desy);}
     // Update the position according to computed forces
     void go();
 

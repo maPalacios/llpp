@@ -83,9 +83,6 @@ int main(int argc, char*argv[]) {
   data.wpx = (double*)malloc(sizeof(double)*size);
   data.wpy = (double*)malloc(sizeof(double)*size);
   data.wpr = (double*)malloc(sizeof(double)*size);
-  data.lwpx = (double*)malloc(sizeof(double)*size);
-  data.lwpy = (double*)malloc(sizeof(double)*size);
-  data.visited = (bool*)malloc(sizeof(bool)*size);
   ParseScenario parser(scenefile, &data);
 
         int WIDTH = 1000;

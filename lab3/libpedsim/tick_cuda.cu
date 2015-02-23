@@ -16,16 +16,11 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 
 using namespace Ped;
 
-__global__ void dummyKernel(double *x, double *y, double *wx, double* wy, double * wr, double * lwx, double * lwy, bool *visited, bool *reached)  {
+__global__ void dummyKernel(double *x, double *y, double *wx, double* wy, double * wr, double * lwx, double * lwy, bool *reached)  {
 	int i = blockIdx.y*128*128 + blockIdx.x * 128+ threadIdx.x;	// This gives every thread a unique ID.
 	double diffx, diffy, length;
-	if (visited[i]){
-		diffx = wx[i]-lwx[i];
-		diffy = wy[i]-lwy[i];
-	} else {
 		diffx = wx[i]-x[i];
 		diffy = wy[i]-y[i];
-	}
 	if ((x[i]-wx[i])*(x[i]-wx[i]) + (y[i]-wy[i])*(y[i]-wy[i]) > wr[i]*wr[i]) {
 		length = sqrt(diffx*diffx+diffy*diffy);
 		x[i] = round(x[i]+diffx/length); // round!
@@ -35,14 +30,13 @@ __global__ void dummyKernel(double *x, double *y, double *wx, double* wy, double
 		x[i] = x[i];
 		y[i] = y[i];
 		reached[i] = true;
-		visited[i] = true;
 	}
 }
 
 
 void whereToGoCUDA(vector<Tagent*> *agents){
 	double *x,*y,*wx,*wy,*wr,*lwx,*lwy;
-	bool *reached, *hreached, *visited;
+	bool *reached, *hreached;
 	int NUM = (*agents).size();
 	int CNUM = 0;
 	int blockGridWidth, blockGridHeight;
@@ -68,7 +62,6 @@ void whereToGoCUDA(vector<Tagent*> *agents){
 	cudaMalloc( (void **)&wr, sizeof(double) * NUM);
 	cudaMalloc( (void **)&lwx, sizeof(double) * NUM);
 	cudaMalloc( (void **)&lwy, sizeof(double) * NUM);
-	cudaMalloc( (void **)&visited, sizeof(bool) * NUM);
 	cudaMalloc( (void **)&reached, sizeof(bool) * NUM);
 
 
@@ -79,16 +72,14 @@ void whereToGoCUDA(vector<Tagent*> *agents){
 	cudaMemcpy(wr, (*agents)[0]->getPosWR(), sizeof(double) * NUM, cudaMemcpyHostToDevice);
 	cudaMemcpy(lwx, (*agents)[0]->getPosLWX(), sizeof(double) * NUM, cudaMemcpyHostToDevice);
 	cudaMemcpy(lwy, (*agents)[0]->getPosLWY(), sizeof(double) * NUM, cudaMemcpyHostToDevice);
-	cudaMemcpy(visited, (*agents)[0]->getVisited(), sizeof(bool) * NUM, cudaMemcpyHostToDevice);
 
 
 
-	dummyKernel<<<blockGridRows, threadBlockRows>>>(x,y,wx,wy,wr,lwx,lwy,visited, reached);
+	dummyKernel<<<blockGridRows, threadBlockRows>>>(x,y,wx,wy,wr,lwx,lwy,reached);
 	cudaThreadSynchronize();
 
 	gpuErrchk(cudaMemcpy((*agents)[0]->getDesX(), x, sizeof(double) * NUM, cudaMemcpyDeviceToHost));
 	cudaMemcpy((*agents)[0]->getDesY(), y, sizeof(double) * NUM, cudaMemcpyDeviceToHost);
-	cudaMemcpy((*agents)[0]->getVisited(), visited, sizeof(bool) * NUM, cudaMemcpyDeviceToHost);
 	cudaMemcpy(hreached, reached, sizeof(bool) * NUM, cudaMemcpyDeviceToHost);
 
 
@@ -113,7 +104,6 @@ void whereToGoCUDA(vector<Tagent*> *agents){
 	cudaFree(lwy);
 	cudaFree(lwx);
 	cudaFree(reached);
-	cudaFree(visited);
 
 	free(hreached);
 }

@@ -39,9 +39,6 @@ Ped::Tagent::Tagent(const Tagent &obj){
   this->wpx = obj.wpx;
   this->wpy = obj.wpy;
   this->wpr = obj.wpr;
-  this->lwpx = obj.lwpx;
-  this->lwpy = obj.lwpy;
-  this->visited = obj.visited;
   this->destination = obj.destination;
   this->lastDestination = obj.lastDestination;
   this->desiredPosition = obj.desiredPosition;
@@ -57,11 +54,6 @@ Ped::Tagent & Ped::Tagent::operator=(const Tagent& obj){
   *wpx = *(obj.wpx);
   *wpy = *(obj.wpy);
   *wpr = *(obj.wpr);
-  *lwpx = *(obj.lwpx);
-  *lwpy = *(obj.lwpy);
-//  *desx = *(obj.desx);
-//  *desy = *(obj.desy);
-  *visited = *(obj.visited);
   desiredPosition = obj.desiredPosition;
   waypoints = obj.waypoints;
   waypointBehavior = obj.waypointBehavior;
@@ -146,7 +138,6 @@ Ped::Tvector Ped::Tagent::computeDirection() {
 
     lastDestination = destination;
     destination = NULL;
-    *visited = true;
   }
 
   return direction;
@@ -158,8 +149,6 @@ Ped::Twaypoint* Ped::Tagent::getNextDestination() {
     nextDestination = destination; // agent hasn't arrived yet
   }
   else if (!waypoints.empty()) {
-    *lwpx = *wpx;
-    *lwpy = *wpy;
     nextDestination = getNextWaypoint();
 
     *wpx = nextDestination->getx();
