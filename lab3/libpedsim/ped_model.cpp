@@ -44,7 +44,6 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
   bool (*fn_pt)(Ped::Tagent*, Ped::Tagent*) = cmp;
   std::set<Ped::Tagent*, bool(*)(Ped::Tagent*, Ped::Tagent*)> agentsWithUniquePosition (fn_pt);
   std::copy(agentsInScenario.begin(), agentsInScenario.end(), std::inserter(agentsWithUniquePosition, agentsWithUniquePosition.begin()));
-  cout << agents.size() << endl;
   agents = std::vector<Ped::Tagent*>(agentsWithUniquePosition.begin(), agentsWithUniquePosition.end());
 
   treehash = new std::map<const Ped::Tagent*, Ped::Ttree*>();
@@ -77,7 +76,6 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
     }
 for (std::vector<Ped::Tagent*>::iterator it = agents.begin(); it != agents.end(); ++it)
 {
-//  std::cout << (*it)->getX() << " " << (*it)->getY() << std::endl;
   tree->addAgent(*it);
 }
 
@@ -203,84 +201,95 @@ double getMedian(vector<int> values)
       return values[size / 2];
 
 }
+pthread_barrier_t barrier;
+
 void * partition(void * arg){
   struct interval *interv = (interval*)arg;
   int left = interv->left;
   int right = interv->right;
-  vector<int> numbers;
-  for (int i=0;i<(*interv->agents).size();i++){
-    int x = (*interv->agents)[i]->getX();
-    if (x >= left && x < right){
-      numbers.push_back(x);
-    }
+  vector<int> myAgents;
+for (int j=0;j<(*interv->agents).size();j++){
+  int x = (*interv->agents)[j]->getX();
+  if (x >= left && x < right){
+    myAgents.push_back(j);
   }
-
-  // TODO TODO TODO
-  /* This may cause problems if an agent is moved across the border before the counting is done */
-  if (numbers.size() > 200){
-    int median = getMedian(numbers);
-    pthread_t threads[2];
-    struct interval * intervleft;
-    struct interval * intervright;
-      intervleft = new struct interval();
-      intervright = new struct interval();
-      intervleft->left = left;
-      intervleft->right = median;
-      intervleft->agents = interv->agents;
-      intervleft->model = interv->model;
-      intervright->left = median;
-      intervright->right = right;
-      intervright->agents = interv->agents;
-      intervright->model = interv->model;
-      pthread_create(&threads[0], NULL, &partition,(void*) intervleft);
-      pthread_create(&threads[1], NULL, &partition,(void*) intervright);
-    void * result;
-    for (int i=0; i< 2;i++){
-      pthread_join(threads[i], &result);
 }
-  } else {
-    for (int i=0;i<(*interv->agents).size();i++){
-      int x = (*interv->agents)[i]->getX();
+  pthread_barrier_wait(&barrier);
+    for (int i=0;i<myAgents.size();i++){
+      int x = (*interv->agents)[myAgents[i]]->getX();
       if (x >= left && x < right){
-          (interv->model)->doSafeMovement(left, right,(*(interv->agents))[i]);
+          (interv->model)->doSafeMovement(left, right,(*interv->agents)[myAgents[i]]);
       }
     }
-  }
+
    pthread_exit(NULL);
 }
 
 
+
+
 void Ped::Model::callPartition(){
-  pthread_t thread;
-  struct interval * interv;
-  interv = new struct interval();
-  interv->left = INT_MIN;
-  interv->right = INT_MAX;
-  interv->agents = &agents;
-  interv->model = this;
-  pthread_create(&thread, NULL, &partition, (void*) interv);
-  cout << "done" << endl;
+  vector<struct interval*> intervals;
+  int min = -40;
+  int max = 200;
+  for (int i=0;i<4;i++){
+    struct interval *   interval = new struct interval;
+    interval->left = min + i*60;
+    interval->right = min + (i+1)*60;
+    interval->agents = &agents;
+    interval->model = this;
+    intervals.push_back(interval);
+  }
+
+redo:
+  bool balanced = false;
+  if(!balanced){
+    for(int i=0;i<intervals.size();i++){
+      vector<int> numbers;
+      for (int j=0;j<agents.size();j++){
+        int x = agents[j]->getX();
+        if (x >= intervals[i]->left && x < intervals[i]->right){
+          numbers.push_back(x);
+        }
+      }
+      if (numbers.size() > 50){
+        struct interval * interval = new struct interval;
+        int diff = intervals[i]->right-intervals[i]->left;
+        interval->left = intervals[i]->left + diff/2;
+        interval->right = intervals[i]->right;
+        interval->agents = &agents;
+        interval->model = this;
+        intervals[i]->right = interval->left;
+        intervals.push_back(interval);
+        goto redo;
+      }
+    }
+  }
+  cout << intervals.size() << endl;
+  pthread_t thread[intervals.size()];
+    pthread_barrier_init (&barrier, NULL, intervals.size());
   void * result;
-  pthread_join(thread, &result);
+  for (int i=0;i<intervals.size();i++)
+    pthread_create(&thread[i], NULL, &partition, (void*) intervals[i]);
+  for (int i=0;i<intervals.size();i++)
+    pthread_join(thread[i], &result);
 }
 
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
   void  Ped::Model::doSafeMovement(int left, int right, Ped::Tagent *agent)
   {
-        // Search for neighboring agents
+    pthread_mutex_lock(&mutex);
+
+    // Search for neighboring agents
     set<const Ped::Tagent *> neighbors = getNeighbors(agent->getX(), agent->getY(), 2);
 
     // Retrieve their positions
     std::vector<std::pair<int, int> > takenPositions;
-    pthread_mutex_lock(&mutex);
-
     for (std::set<const Ped::Tagent*>::iterator neighborIt = neighbors.begin(); neighborIt != neighbors.end(); ++neighborIt) {
       std::pair<int,int> position((*neighborIt)->getX(), (*neighborIt)->getY());
       takenPositions.push_back(position);
     }
-pthread_mutex_unlock(&mutex);
 
     // Compute the three alternative positions that would bring the agent
     // closer to his desiredPosition, starting with the desiredPosition itself
@@ -310,20 +319,21 @@ pthread_mutex_unlock(&mutex);
 
       // If the current position is not yet taken by any neighbor
       if (std::find(takenPositions.begin(), takenPositions.end(), *it) == takenPositions.end()) {
-pthread_mutex_lock(&mutex);
 
 	// Set the agent's position
+
     	agent->setX((*it).first);
     	agent->setY((*it).second);
 
 	// Update the quadtree
 	(*treehash)[agent]->moveAgent(agent);
-  pthread_mutex_unlock(&mutex);
 
     	break;
 
       }
     }
+pthread_mutex_unlock(&mutex);
+
   }
 
 /// Returns the list of neighbors within dist of the point x/y. This
@@ -343,6 +353,7 @@ set<const Ped::Tagent*> Ped::Model::getNeighbors(int x, int y, int dist) const {
 
   // copy the neighbors to a set
   return set<const Ped::Tagent*>(neighborList.begin(), neighborList.end());
+
 }
 
 /// Populates the list of neighbors that can be found around x/y./// This triggers a cleanup of the tree structure. Unused leaf nodes are collected in order to
