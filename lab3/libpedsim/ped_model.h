@@ -8,6 +8,8 @@
 #include <iostream>
 #include <atomic>
 
+#define OFFSET 400
+
 namespace Ped{
 	class Tagent;
 	class Ttree;

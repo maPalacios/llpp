@@ -88,8 +88,8 @@ int main(int argc, char*argv[]) {
   data.visited = (bool*)malloc(sizeof(bool)*size);
   ParseScenario parser(scenefile, &data);
 
-        int WIDTH = 400;
-        int HEIGHT = 400;
+        int WIDTH = 1000;
+        int HEIGHT = 1000;
         atomic<bool> * rows[WIDTH];
         for (int i=0;i<WIDTH;i++){
           rows[i] = (atomic<bool>*)malloc(sizeof(atomic<bool>)*HEIGHT);
@@ -108,7 +108,7 @@ int main(int argc, char*argv[]) {
   QApplication app(argc, argv);
   MainWindow mainwindow(model);
 
-  const int delay_ms = 100;
+  const int delay_ms = 10;
   Timer *timer;
   #define TICK_LIMIT 10000
   #define AS_FAST_AS_POSSIBLE 0

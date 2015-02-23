@@ -9,26 +9,29 @@
 #include <algorithm>
 #include <limits.h>
 #include <atomic>
+
+
+
 // Comparator used to identify if two agents differ in their position
 bool cmp(Ped::Tagent *a, Ped::Tagent *b) {
-				return (a->getX() < b->getX()) || ((a->getX() == b->getX()) && (a->getY() < b->getY()));
+	return (a->getX() < b->getX()) || ((a->getX() == b->getX()) && (a->getY() < b->getY()));
 }
 
 enum IMPLEMENTATION {CUDA, VECTOR, OMP, PTHREAD, SEQ};
 struct interval {
-				int left, right;
-				Ped::Model *model;
-				std::vector<Ped::Tagent*> *agents;
+	int left, right;
+	Ped::Model *model;
+	std::vector<Ped::Tagent*> *agents;
 };
 
 
 void Ped::Model::setPar(int inPar, int numProcs){
-				implementation = (IMPLEMENTATION)inPar;
-				np = numProcs;
+	implementation = (IMPLEMENTATION)inPar;
+	np = numProcs;
 }
 
 int Ped::Model::getPar(){
-				return implementation;
+return implementation;
 }
 
 int Ped::Model::getNumProcs(){
@@ -48,19 +51,9 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 
 				treehash = new std::map<const Ped::Tagent*, Ped::Ttree*>();
 				tree = new Ttree(NULL, treehash, 0, treeDepth, 0, 0, 1000, 800);
-/*
-				int WIDTH = 400;
-				int HEIGHT = 400;
-				atomic<bool> * rows[WIDTH];
-				for (int i=0;i<WIDTH;i++){
-					rows[i] = (atomic<bool>*)malloc(sizeof(atomic<bool>)*HEIGHT);
-				}
-				for (int i=0;i<WIDTH;i++)
-					for (int j=0;j<HEIGHT;j++)
-						rows[i][j] = false;
-		
-				grid = rows;
-*/
+
+
+
 				int size = agents.size();
 				data.ax = (double*)malloc(sizeof(double)*size);
 				data.ay = (double*)malloc(sizeof(double)*size);
@@ -85,7 +78,7 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 				}
 				for (std::vector<Ped::Tagent*>::iterator it = agents.begin(); it != agents.end(); ++it)
 				{
-					grid[(int)(*it)->getX()+100][(int)(*it)->getY()+100] = true;
+					grid[(int)(*it)->getX()+OFFSET][(int)(*it)->getY()+OFFSET] = true;
 								tree->addAgent(*it);
 				}
 
@@ -124,31 +117,26 @@ void Ped::Model::tick(){
 								void * result;
 								for (int i=0; i< numProc;i++)
 												pthread_join(threads[i], &result);
-								for(int i=0;i<numAgents;i++)
-												;
-								//        doSafeMovement(agents[i]);
 
+								callPartition();
 				} else if (getPar() == OMP) {
 #pragma omp parallel for num_threads(np)
 								for(int i=0;i<numAgents;i++){
 												agents[i]->whereToGo();
 												agents[i]->go();
-					//							      doSafeMovement(0,0,agents[i]);
 								}
+								callPartition();
 				} else if (getPar() == SEQ) {
 								for(int i=0;i<numAgents;i++){
 												agents[i]->whereToGo();
 												agents[i]->go();
-												//  doSafeMovement(agents[i]);
 								}
 								callPartition();
 
 				}
 				else if (getPar() == CUDA){
 								whereToGoCUDA(&agents);
-								for(int i=0;i<numAgents;i++){
-												//      doSafeMovement(agents[i]);
-								}
+								callPartition();
 				} else if (getPar() == VECTOR){
 #pragma omp parallel for num_threads(np)
 								for(int i=0;i<numAgents-1;i+=2){
@@ -178,10 +166,10 @@ void Ped::Model::tick(){
 
 																if (dres[0] > 0 && dres[1] > 0){
 																				length = _mm_add_pd(_mm_mul_pd(diffx, diffx), _mm_mul_pd(diffy, diffy));
-																				length = _mm_sqrt_pd(length);
+																				length = _mm_sqrt_pd(*res);
 																				*desx = _mm_add_pd(*x, _mm_div_pd(diffx,length));
 																				*desy = _mm_add_pd(*y, _mm_div_pd(diffy,length));
-																} else {
+														} else {
 																				agents[i]->whereToGo();
 																				agents[i]->go();
 																				agents[i+1]->whereToGo();
@@ -195,9 +183,7 @@ void Ped::Model::tick(){
 												}
 
 								}
-								for(int i=0;i<numAgents;i++){
-												//      doSafeMovement(agents[i]);
-								}
+								callPartition();
 				}
 }
 
@@ -214,64 +200,46 @@ double getMedian(vector<int> values)
 pthread_barrier_t barrier;
 
 void * partition(void * arg){
-				struct interval *interv = (interval*)arg;
-				int left = interv->left;
-				int right = interv->right;
-				vector<int> myAgents;
-				for (int j=0;j<(*interv->agents).size();j++){
-								int x = (*interv->agents)[j]->getX();
-								if (x >= left && x < right){
-												myAgents.push_back(j);
-								}
-				}
-				pthread_barrier_wait(&barrier);
-				for (int i=0;i<myAgents.size();i++){
-								int x = (*interv->agents)[myAgents[i]]->getX();
-								if (x >= left && x < right)
-												(interv->model)->doSafeMovement(left, right,(*interv->agents)[myAgents[i]]);
-				}
-
-				pthread_exit(NULL);
+	struct interval *interv = (interval*)arg;
+	int left = interv->left;
+	int right = interv->right;
+	vector<int> myAgents;
+	for (int j=0;j<(*interv->agents).size();j++){
+		int x = (*interv->agents)[j]->getX();
+	if (x >= left && x < right){
+	myAgents.push_back(j);
+	}
+	}
+	pthread_barrier_wait(&barrier);
+	for (int i=0;i<myAgents.size();i++){
+		int x = (*interv->agents)[myAgents[i]]->getX();
+		if (x >= left && x < right)
+			(interv->model)->doSafeMovement(left, right,(*interv->agents)[myAgents[i]]);
+		}
+	pthread_exit(NULL);
 }
-
-
+/*
 void Ped::Model::callPartition(){
 				vector<struct interval*> intervals;
-				int min = -40;
-				int max = 200;
+
+					vector<int> numbers;
+					for (int j=0;j<agents.size();j++)
+									numbers.push_back( agents[j]->getX());
+				sort(numbers.begin(), numbers.end());				
+				int min = numbers.front();
+				int max = numbers.back()+1;
+				int num = numbers.size();
+	
 				for (int i=0;i<4;i++){
 								struct interval *   interval = new struct interval;
-								interval->left = min + i*60;
-								interval->right = min + (i+1)*60;
+								interval->left = numbers[i*num/4];
+								if (i !=3)
+									interval->right = numbers[(i+1)*(num/4)+1];
+								else
+									interval->right = max;
 								interval->agents = &agents;
 								interval->model = this;
 								intervals.push_back(interval);
-				}
-
-redo:
-				bool balanced = false;
-				if(!balanced){
-								for(int i=0;i<intervals.size();i++){
-												vector<int> numbers;
-												for (int j=0;j<agents.size();j++){
-																int x = agents[j]->getX();
-																if (x >= intervals[i]->left && x < intervals[i]->right){
-																				numbers.push_back(x);
-																}
-												}
-												int diff = intervals[i]->right-intervals[i]->left;
-												if (numbers.size() > agents.size()/2 && diff > 1){
-																struct interval * interval = new struct interval;
-																interval->left = getMedian(numbers);
-//																interval->left = intervals[i]->left + diff/2;
-																interval->right = intervals[i]->right;
-																interval->agents = &agents;
-																interval->model = this;
-																intervals[i]->right = interval->left;
-																intervals.push_back(interval);
-																goto redo;
-												}
-								}
 				}
 		//		cout << intervals.size() << endl;
 				pthread_t thread[intervals.size()];
@@ -283,9 +251,15 @@ redo:
 								pthread_join(thread[i], &result);
 
 }
+*/
+void Ped::Model::callPartition(){
+	#pragma omp parallel for num_threads(np) 
+	for (int i=0;i<agents.size();i++){
+		doSafeMovement(0,0, agents[i]);
+	}
+}
 
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 void  Ped::Model::doSafeMovement(int left, int right, Ped::Tagent *agent)
 {
 				std::vector<std::pair<int, int> > prioritizedAlternatives;
@@ -317,21 +291,17 @@ void  Ped::Model::doSafeMovement(int left, int right, Ped::Tagent *agent)
 
 												// Set the agent's position
 												bool exp = false;
-												if (grid[(*it).first+100][(*it).second+100].compare_exchange_strong(exp, true)){
-												grid[(int)agent->getX()+100][(int)agent->getY()+100] = false;			
+												if (grid[(*it).first+OFFSET][(*it).second+OFFSET].compare_exchange_strong(exp, true)){
+												bool exp = true;
+												grid[(int)agent->getX()+OFFSET][(int)agent->getY()+OFFSET].compare_exchange_strong(exp, false);			
+												//grid[(int)agent->getX()+100][(int)agent->getY()+100] = false;			
 												agent->setX((*it).first);
 												agent->setY((*it).second);
 }
 												else
 														continue;
-												// Update the quadtree
-												//(*treehash)[agent]->moveAgent(agent);
-
 												break;
-
-	//							}
 				}
-	//			pthread_mutex_unlock(&mutex);
 
 }
 
