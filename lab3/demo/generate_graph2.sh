@@ -1,4 +1,6 @@
 #!/bin/zsh
+
+
 echo "tab = [" > graph.m
 ./demo --timing-mode hugeScenario.xml | grep -Eo '[0-9]{1,4}\.[0-9]{1,4}' | tr -d '\n'  >> graph.m
 echo " " | tr -d '\n' >> graph.m

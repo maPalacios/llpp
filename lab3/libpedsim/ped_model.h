@@ -29,6 +29,7 @@ struct CUDA_DATA{
 
     void setup(std::vector<Tagent*> agentsInScenario);
     void setPar(int type, int np);
+    void setCollisionMode(int type){collisionMode = type;}
     int getPar();
     int getNumProcs();
     void tick();
@@ -60,7 +61,7 @@ void doSafeMovement(int left, int right, Ped::Tagent *agent);
 
 	set<const Ped::Tagent*> getNeighbors(int x, int y, int dist) const;
 	void getNeighbors(list<const Ped::Tagent*>& neighborList, int x, int y, int d) const;
-
+	int collisionMode;
 
  };
 }
