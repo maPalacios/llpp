@@ -173,7 +173,10 @@ void Ped::Model::tick(){
 								callPartition();
 				}
 }
-
+/// Returns the median of values
+/// \date    2012-02-25
+/// \return  The median of values
+/// \param   values vector of ints
 double getMedian(vector<int> values)
 {
 				int size = values.size();
