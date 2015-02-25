@@ -99,10 +99,10 @@ Ped::Tvector Ped::Twaypoint::getForce(double agentX, double agentY, double fromx
 //          Ped::Tvector pnormal = normalpoint(agentX, agentY, oc11, oc12, oc21, oc22);
 //          //TODO: use normalpoint(Tvector(p1, p2), Tvector(oc11, oc12), Tvector(oc21, oc22));
 //
+//          if(pndist == 0)
 //          Tvector pndistance(agentX - pnormal.x, agentY - pnormal.y);
 //          double pndist = pndistance.length();
 //
-//          if(pndist == 0)
 //              return Ped::Tvector();
 //
 //          if(reached != NULL) {
