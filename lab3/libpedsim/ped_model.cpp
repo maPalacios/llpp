@@ -24,20 +24,31 @@ struct interval {
 	std::vector<Ped::Tagent*> *agents;
 };
 
-
+/// Set number of processors and type of parallelization
+/// \date    2012-02-25
+/// \param   inPar - the type of parallelization to use {CUDA, VECTOR, OMP, PTHREAD, SEQ} 0-4
+/// \param   numProcs - number of processors to employ
 void Ped::Model::setPar(int inPar, int numProcs){
 	implementation = (IMPLEMENTATION)inPar;
 	np = numProcs;
 }
 
+/// Get the type of parallelization used
+/// \date    2012-02-25
+/// \return  The type of parallelization used
 int Ped::Model::getPar(){
 return implementation;
 }
-
+/// Get the type number of processors employed
+/// \date    2012-02-25
+/// \return  The number of processors employed
 int Ped::Model::getNumProcs(){
 				return np;
 }
 
+/// TODO
+/// \date    2012-02-25
+/// \param	 agentsInScenario - 
 void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 {
 				agents = agentsInScenario;
@@ -81,11 +92,16 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 
 }
 
-const std::vector<Ped::Tagent*> Ped::Model::getAgents() const
-{
+/// Get the list of agents
+/// \date    2012-02-25
+/// \return  The list of agents 
+const std::vector<Ped::Tagent*> Ped::Model::getAgents() const{
 				return agents;
 }
 
+/// TODO
+/// \date    2012-02-25
+/// \param   arg - TODO 
 void* tickHelp(void *arg){
 				struct interval myInterval = *((struct interval*)arg);
 				for (int i=myInterval.left; i<myInterval.right; i++){
@@ -95,6 +111,8 @@ void* tickHelp(void *arg){
 				pthread_exit(NULL);
 }
 
+/// TODO
+/// \date    2012-02-25 
 void Ped::Model::tick(){
 				int numAgents = agents.size();
 				int numProc = np;
@@ -111,6 +129,7 @@ void Ped::Model::tick(){
 												intervals[i]->agents = &agents;
 												pthread_create(&threads[i], NULL, &tickHelp,(void*) intervals[i]);
 								}
+								
 								void * result;
 								for (int i=0; i< numProc;i++)
 												pthread_join(threads[i], &result);
@@ -189,6 +208,9 @@ double getMedian(vector<int> values)
 }
 pthread_barrier_t barrier;
 
+/// TODO
+/// \date    2012-02-25
+/// \param   arg - TODO
 void * partition(void * arg){
 	struct interval *interv = (interval*)arg;
 	int left = interv->left;
@@ -242,6 +264,9 @@ void Ped::Model::callPartition(){
 
 }
 */
+
+/// Assign doSafeMovement(0, 0, agents[i]) for each agent in np number of threads
+/// \date    2012-02-25
 void Ped::Model::callPartition(){
 	#pragma omp parallel for num_threads(np) 
 	for (int i=0;i<agents.size();i++){
@@ -249,7 +274,11 @@ void Ped::Model::callPartition(){
 	}
 }
 
-
+/// TODO
+/// \date    2012-02-25
+/// \param   left -  TODO
+/// \param   right - TODO
+/// \param   agent - TODO
 void  Ped::Model::doSafeMovement(int left, int right, Ped::Tagent *agent)
 {
 				std::vector<std::pair<int, int> > prioritizedAlternatives;
