@@ -1,0 +1,66 @@
+==13519== Memcheck, a memory error detector
+==13519== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==13519== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
+==13519== Command: ./demo
+==13519== 
+==13519== Invalid write of size 8
+==13519==    at 0x4E4AFD7: Ped::Tagent::computeForces() (ped_agent.cpp:63)
+==13519==    by 0x4E4C8D2: Ped::Model::setup(std::vector<Ped::Tagent*, std::allocator<Ped::Tagent*> >) (ped_model.cpp:41)
+==13519==    by 0x405112: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==  Address 0xa821f28 is 0 bytes after a block of size 216 alloc'd
+==13519==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==13519==    by 0x40610D: ParseScenario::handleAgent(CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406B5A: ParseScenario::handleXmlStartElement(CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406CCA: ParseScenario::processXmlLine(QByteArray, CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406DBB: ParseScenario::ParseScenario(QString, CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x4050DB: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519== 
+==13519== Invalid write of size 8
+==13519==    at 0x4E4AFE3: Ped::Tagent::computeForces() (ped_agent.cpp:63)
+==13519==    by 0x4E4C8D2: Ped::Model::setup(std::vector<Ped::Tagent*, std::allocator<Ped::Tagent*> >) (ped_model.cpp:41)
+==13519==    by 0x405112: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==  Address 0xa821f30 is 8 bytes after a block of size 216 alloc'd
+==13519==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==13519==    by 0x40610D: ParseScenario::handleAgent(CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406B5A: ParseScenario::handleXmlStartElement(CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406CCA: ParseScenario::processXmlLine(QByteArray, CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406DBB: ParseScenario::ParseScenario(QString, CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x4050DB: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519== 
+==13519== Invalid write of size 8
+==13519==    at 0x4E4AFEF: Ped::Tagent::computeForces() (ped_agent.cpp:63)
+==13519==    by 0x4E4C8D2: Ped::Model::setup(std::vector<Ped::Tagent*, std::allocator<Ped::Tagent*> >) (ped_model.cpp:41)
+==13519==    by 0x405112: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==  Address 0xa821f38 is 16 bytes after a block of size 216 alloc'd
+==13519==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==13519==    by 0x40610D: ParseScenario::handleAgent(CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406B5A: ParseScenario::handleXmlStartElement(CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406CCA: ParseScenario::processXmlLine(QByteArray, CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x406DBB: ParseScenario::ParseScenario(QString, CUDA_DATA*) (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==    by 0x4050DB: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519== 
+==13519== Invalid read of size 8
+==13519==    at 0x4E4CA18: Ped::Model::setup(std::vector<Ped::Tagent*, std::allocator<Ped::Tagent*> >) (ped_model.cpp:57)
+==13519==    by 0x405112: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519==  Address 0xc0263dc2cf3c7b9d is not stack'd, malloc'd or (recently) free'd
+==13519== 
+==13519== 
+==13519== Process terminating with default action of signal 11 (SIGSEGV)
+==13519==  General Protection Fault
+==13519==    at 0x4E4CA18: Ped::Model::setup(std::vector<Ped::Tagent*, std::allocator<Ped::Tagent*> >) (ped_model.cpp:57)
+==13519==    by 0x405112: main (in /home/jonathan/Desktop/llpp/lab3/demo/demo)
+==13519== 
+==13519== HEAP SUMMARY:
+==13519==     in use at exit: 1,954,744 bytes in 8,662 blocks
+==13519==   total heap usage: 9,241 allocs, 579 frees, 2,775,716 bytes allocated
+==13519== 
+==13519== LEAK SUMMARY:
+==13519==    definitely lost: 0 bytes in 0 blocks
+==13519==    indirectly lost: 0 bytes in 0 blocks
+==13519==      possibly lost: 4,777 bytes in 86 blocks
+==13519==    still reachable: 1,949,967 bytes in 8,576 blocks
+==13519==         suppressed: 0 bytes in 0 blocks
+==13519== Rerun with --leak-check=full to see details of leaked memory
+==13519== 
+==13519== For counts of detected and suppressed errors, rerun with: -v
+==13519== ERROR SUMMARY: 6145 errors from 4 contexts (suppressed: 0 from 0)
