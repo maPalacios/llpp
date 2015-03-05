@@ -24,6 +24,11 @@ struct interval {
 	std::vector<Ped::Tagent*> *agents;
 };
 
+struct cudaData {
+	std::vector<Ped::Tagent*> *agents;
+	int **hm, **sm, **bm;
+};
+
 /// Set number of processors and type of parallelization
 /// \date    2012-02-25
 /// \param   inPar - the type of parallelization to use {CUDA, VECTOR, OMP, PTHREAD, SEQ} 0-4
@@ -48,7 +53,7 @@ int Ped::Model::getNumProcs(){
 
 /// TODO
 /// \date    2012-02-25
-/// \param	 agentsInScenario - 
+/// \param	 agentsInScenario -
 void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 {
 	agents = agentsInScenario;
@@ -94,14 +99,14 @@ setupHeatmapSeq();
 }
 /// Get the list of agents
 /// \date    2012-02-25
-/// \return  The list of agents 
+/// \return  The list of agents
 const std::vector<Ped::Tagent*> Ped::Model::getAgents() const{
 				return agents;
 }
 
 /// TODO
 /// \date    2012-02-25
-/// \param   arg - TODO 
+/// \param   arg - TODO
 void* tickHelp(void *arg){
 	struct interval myInterval = *((struct interval*)arg);
 	for (int i=myInterval.left; i<myInterval.right; i++){
@@ -111,9 +116,26 @@ void* tickHelp(void *arg){
 	pthread_exit(NULL);
 }
 
+void * fadeHelp(void* arg){
+	int ** heatmap = *((int***)arg);
+	fadeHeatmap(heatmap);
+}
+
+void * cudaHelp(void * arg){
+	struct cudaData qd = *((struct cudaData *)arg);
+//	updateHeatmapSeq();
+	updateHeatmap(qd.agents, qd.hm);
+	scaleHeatmap(qd.hm, qd.sm);
+	blurHeatmap(qd.sm, qd.bm);
+}
+
 /// TODO
-/// \date    2012-02-25 
+/// \date    2012-02-25
 void Ped::Model::tick(){
+//pthread_t fadeThread;
+//pthread_create(&fadeThread, NULL, &fadeHelp, (void*)&heatmap);
+//	fadeHeatmap(heatmap);
+
 	int numAgents = agents.size();
 	int numProc = np;
 
@@ -133,25 +155,20 @@ void Ped::Model::tick(){
 		for (int i=0; i< numProc;i++)
 			pthread_join(threads[i], &result);
 
-		callPartition();
 	} else if (getPar() == OMP) {
 #pragma omp parallel for num_threads(np)
 		for(int i=0;i<numAgents;i++){
 			agents[i]->whereToGo();
 			agents[i]->go();
 		}
-		callPartition();
 	} else if (getPar() == SEQ) {
 		for(int i=0;i<numAgents;i++){
 			agents[i]->whereToGo();
 			agents[i]->go();
 		}
-		callPartition();
-
 	}
 	else if (getPar() == CUDA){
 		whereToGoCUDA(&agents);
-		callPartition();
 	} else if (getPar() == VECTOR){
 #pragma omp parallel for num_threads(np)
 		for(int i=0;i<numAgents-1;i+=2){
@@ -188,11 +205,27 @@ void Ped::Model::tick(){
 				agents[i+1]->go();
 			}
 		}
-		callPartition();
 	}
-	cout << "Hej" << endl;
-	updateHeatmapSeq();
+void * result;
+//pthread_join(fadeThread, &result);
+if (getPar() == SEQ){
+	pthread_t cudaThread;
+	struct cudaData qd;
+	qd.agents = &agents;
+	qd.hm = heatmap;
+	qd.sm = scaled_heatmap;
+	qd.bm = blurred_heatmap;
+	pthread_create(&cudaThread, NULL, &cudaHelp, &qd);
+	callPartition();
+	pthread_join(cudaThread, &result);
+
+} else {
+		callPartition();
+		updateHeatmapSeq();
+	}
 }
+
+
 double getMedian(vector<int> values)
 {
 	int size = values.size();
@@ -234,7 +267,7 @@ void Ped::Model::callPartition(){
 		for (int i=0;i<agents.size();i++)
 			doSafeMovement(0,0, agents[i]);
 	} else if (collisionMode == OMP) {
-#pragma omp parallel for num_threads(np) 
+#pragma omp parallel for num_threads(np)
 		for (int i=0;i<agents.size();i++)
 			doSafeMovement(0,0, agents[i]);
 	} else {
@@ -243,7 +276,7 @@ void Ped::Model::callPartition(){
 		vector<int> numbers;
 		for (int j=0;j<agents.size();j++)
 			numbers.push_back( agents[j]->getX());
-		sort(numbers.begin(), numbers.end());				
+		sort(numbers.begin(), numbers.end());
 		int min = numbers.front();
 		int max = numbers.back()+1;
 		int num = numbers.size();
@@ -303,8 +336,8 @@ void  Ped::Model::doSafeMovement(int left, int right, Ped::Tagent *agent)
 		bool exp = false;
 		if (grid[(*it).first+OFFSET][(*it).second+OFFSET].compare_exchange_strong(exp, true)){
 			bool exp = true;
-			grid[(int)agent->getX()+OFFSET][(int)agent->getY()+OFFSET].compare_exchange_strong(exp, false);			
-			//grid[(int)agent->getX()+100][(int)agent->getY()+100] = false;			
+			grid[(int)agent->getX()+OFFSET][(int)agent->getY()+OFFSET].compare_exchange_strong(exp, false);
+			//grid[(int)agent->getX()+100][(int)agent->getY()+100] = false;
 			agent->setX((*it).first);
 			agent->setY((*it).second);
 		}

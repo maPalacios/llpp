@@ -2,11 +2,12 @@
 
 #include <QtGui>
 #include <QBrush>
-
+#include <QImage>
 #include <iostream>
+#include <algorithm>
+
 MainWindow::MainWindow(const Ped::Model &model) : model(model)
 {
-  
   // The Window 
   graphicsView = new QGraphicsView();
 
@@ -18,18 +19,12 @@ MainWindow::MainWindow(const Ped::Model &model) : model(model)
   // Connect
   graphicsView->setScene(scene);
 
-
-  // Paint on surface
-  scene->setBackgroundBrush(Qt::black);
-  //graphicsscene->setItemIndexMethod(QGraphicsScene::NoIndex);
-  
-
   for (int x=0; x<=800; x+=cellsizePixel)
   {
     scene->addLine(x,0,x,800, QPen(Qt::gray));
   }
 
-// Now add the horizontal lines, paint them green
+ // Now add the horizontal lines, paint them green
   for (int y=0; y<=800; y+=cellsizePixel)
   {
     scene->addLine(0,y,800,y, QPen(Qt::gray));
@@ -42,28 +37,39 @@ MainWindow::MainWindow(const Ped::Model &model) : model(model)
       viewAgents.push_back(new ViewAgent(agent,scene));
     }
 
-const int heatmapSize = model.getHeatmapSize();
-QPixmap pixmapDummy = QPixmap(heatmapSize, heatmapSize);
-pixmap = scene->addPixmap(pixmapDummy);
+  ////////////
+  /// NEW
+  ///////////////////////////////////////////////
+  const int heatmapSize = model.getHeatmapSize();
+  QPixmap pixmapDummy = QPixmap(heatmapSize, heatmapSize);
+  pixmap = scene->addPixmap(pixmapDummy);
+  ////////////
+  /// END NEW
+  ///////////////////////////////////////////////
 
   paint();
   graphicsView->show(); // Redundant? 
 }
 
- 
-void MainWindow::paint() {
-  //std::cout << "painting" << endl;
 
+void MainWindow::paint() {
+  ////////////
+  /// NEW
+  ///////////////////////////////////////////////
+  const int heatmapSize = model.getHeatmapSize();
+  QImage image((uchar*) *model.getHeatmap(), heatmapSize, heatmapSize, heatmapSize * sizeof(int), QImage::Format_ARGB32);
+  pixmap->setPixmap(QPixmap::fromImage(image));
+  ////////////
+  /// END NEW
+  ///////////////////////////////////////////////
   
   for(auto a : viewAgents)
-    {
-      a->paint();
-    }
+  {
+    a->paint();
+  }
 }
 
-  
 int MainWindow::cellToPixel(int val)
 {
-  //cout << "conv" << val << " " << val*cellsizePixel << endl;
   return val*cellsizePixel;
 }

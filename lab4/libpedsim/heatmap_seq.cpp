@@ -9,7 +9,7 @@ void Ped::Model::setupHeatmapSeq()
   int *hm = (int*) calloc(SIZE*SIZE,sizeof(int));
   int *shm = (int*) malloc(SCALED_SIZE*SCALED_SIZE*sizeof(int));
   int *bhm = (int*) malloc(SCALED_SIZE*SCALED_SIZE*sizeof(int));
-  
+
   heatmap = (int**) malloc(SIZE*sizeof(int*));
 
   scaled_heatmap = (int**) malloc(SCALED_SIZE*sizeof(int*));
@@ -18,16 +18,17 @@ void Ped::Model::setupHeatmapSeq()
   for(int i = 0; i < SIZE; i++)
   {
     heatmap[i] = hm + SIZE*i;
-  } 
+  }
   for(int i = 0; i < SCALED_SIZE; i++)
   {
     scaled_heatmap[i] = shm + SCALED_SIZE*i;
     blurred_heatmap[i] = bhm + SCALED_SIZE*i;
-  } 
+  }
 }
 
 void Ped::Model::updateHeatmapSeq()
 {
+
   for(int x = 0; x < SIZE; x++)
   {
     for(int y = 0; y < SIZE; y++)
@@ -36,7 +37,7 @@ void Ped::Model::updateHeatmapSeq()
       heatmap[y][x] *= 0.80;
     }
   }
-  
+
   // Count how many agents want to go to each location
   for(int i = 0; i < agents.size(); i++)
   {
@@ -48,7 +49,7 @@ void Ped::Model::updateHeatmapSeq()
     {
       continue;
     }
-    
+
     // intensify heat for better color results
     heatmap[y][x] += 40;
 
@@ -61,8 +62,10 @@ void Ped::Model::updateHeatmapSeq()
       heatmap[y][x]=  heatmap[y][x] < 255 ?heatmap[y][x]:255;
     }
   }
-  
+
+
   // Scale the data for visual representation
+
   for(int y = 0; y < SIZE; y++)
   {
     for(int x = 0; x < SIZE; x++)
@@ -77,7 +80,7 @@ void Ped::Model::updateHeatmapSeq()
       }
     }
   }
-  
+
   // Weights for blur filter
   const int w[5][5] = {
     {1,4,7,4,1},
@@ -86,9 +89,9 @@ void Ped::Model::updateHeatmapSeq()
     {4,16,26,16,4},
     {1,4,7,4,1}
   };
-  
+
 #define WEIGHTSUM 273
-  // Apply gaussian blurfilter		       
+  // Apply gaussian blurfilter
   for(int i = 2;i < SCALED_SIZE - 2; i++)
   {
     for(int j = 2;j < SCALED_SIZE - 2; j++)
@@ -105,6 +108,7 @@ void Ped::Model::updateHeatmapSeq()
       blurred_heatmap[i][j] = 0x00FF0000 | value<<24 ;
     }
   }
+
 }
 
 int const * const * Ped::Model::getHeatmap() const {

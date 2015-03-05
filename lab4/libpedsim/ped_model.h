@@ -68,7 +68,7 @@ void doSafeMovement(int left, int right, Ped::Tagent *agent);
 
 	#define SIZE 1024
 	#define CELLSIZE 5
-	#define SCALED_SIZE SIZE*CELLSIZE
+	#define SCALED_SIZE 5120
 
 	int ** heatmap;
 	int ** scaled_heatmap;

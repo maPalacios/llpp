@@ -30,7 +30,7 @@ int main(int argc, char*argv[]) {
 	bool timing_mode = 0;
 	int i = 1;
 	QString scenefile = "scenario.xml";
-	string scenefileString = "scenario.xml"; 
+	string scenefileString = "scenario.xml";
 	int par = SEQ;
 	int np = 1;
 	int collisionMode = PTHREAD;
@@ -112,7 +112,7 @@ int main(int argc, char*argv[]) {
 
 	const int delay_ms = 10;
 	Timer *timer;
-#define TICK_LIMIT 10000
+#define TICK_LIMIT 100
 #define AS_FAST_AS_POSSIBLE 0
 	if(timing_mode)
 	{
