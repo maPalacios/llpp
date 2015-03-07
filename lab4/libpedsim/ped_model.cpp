@@ -95,13 +95,13 @@ void Ped::Model::setup(vector<Ped::Tagent*> agentsInScenario)
 		tree->addAgent(*it);
 	}
 
-setupHeatmapSeq();
+	setupHeatmapSeq();
 }
 /// Get the list of agents
 /// \date    2012-02-25
 /// \return  The list of agents
 const std::vector<Ped::Tagent*> Ped::Model::getAgents() const{
-				return agents;
+	return agents;
 }
 
 /// TODO
@@ -123,7 +123,7 @@ void * fadeHelp(void* arg){
 
 void * cudaHelp(void * arg){
 	struct cudaData qd = *((struct cudaData *)arg);
-//	updateHeatmapSeq();
+	//	updateHeatmapSeq();
 	updateHeatmap(qd.agents, qd.hm);
 	scaleHeatmap(qd.hm, qd.sm);
 	blurHeatmap(qd.sm, qd.bm);
@@ -132,9 +132,11 @@ void * cudaHelp(void * arg){
 /// TODO
 /// \date    2012-02-25
 void Ped::Model::tick(){
-//pthread_t fadeThread;
-//pthread_create(&fadeThread, NULL, &fadeHelp, (void*)&heatmap);
-//	fadeHeatmap(heatmap);
+		pthread_t fadeThread;
+	if (heatmapMode == 1) {// cuda
+		pthread_create(&fadeThread, NULL, &fadeHelp, (void*)&heatmap);
+	}
+
 
 	int numAgents = agents.size();
 	int numProc = np;
@@ -206,20 +208,20 @@ void Ped::Model::tick(){
 			}
 		}
 	}
-void * result;
-//pthread_join(fadeThread, &result);
-if (getPar() == SEQ){
-	pthread_t cudaThread;
-	struct cudaData qd;
-	qd.agents = &agents;
-	qd.hm = heatmap;
-	qd.sm = scaled_heatmap;
-	qd.bm = blurred_heatmap;
-	pthread_create(&cudaThread, NULL, &cudaHelp, &qd);
-	callPartition();
-	pthread_join(cudaThread, &result);
+	if (heatmapMode == 1){ // cuda
+		void * result;
+		pthread_join(fadeThread, &result);
+		pthread_t cudaThread;
+		struct cudaData qd;
+		qd.agents = &agents;
+		qd.hm = heatmap;
+		qd.sm = scaled_heatmap;
+		qd.bm = blurred_heatmap;
+		pthread_create(&cudaThread, NULL, &cudaHelp, &qd);
+		callPartition();
+		pthread_join(cudaThread, &result);
 
-} else {
+	} else {
 		callPartition();
 		updateHeatmapSeq();
 	}

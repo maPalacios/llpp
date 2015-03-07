@@ -6,19 +6,10 @@
 
 #define DIM 256
 
-
+double totfade = 0;
 double totblur =0;
 double totupdate = 0;
 double totscale = 0;
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
-{
-	if (code != cudaSuccess)
-	{
-		fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-		if (abort) exit(code);
-	}
-}
 
 using namespace Ped;
 
@@ -137,7 +128,7 @@ void whereToGoCUDA(vector<Tagent*> *agents){
 	dummyKernel<<<blockGridRows, threadBlockRows>>>(x,y,wx,wy,wr,lwx,lwy,reached);
 	cudaThreadSynchronize();
 
-	gpuErrchk(cudaMemcpy((*agents)[0]->getDesX(), x, sizeof(double) * NUM, cudaMemcpyDeviceToHost));
+	cudaMemcpy((*agents)[0]->getDesX(), x, sizeof(double) * NUM, cudaMemcpyDeviceToHost);
 	cudaMemcpy((*agents)[0]->getDesY(), y, sizeof(double) * NUM, cudaMemcpyDeviceToHost);
 	cudaMemcpy(hreached, reached, sizeof(bool) * NUM, cudaMemcpyDeviceToHost);
 
@@ -187,8 +178,20 @@ void fadeHeatmap(int ** heatmap){
 	int * hm;
 	cudaMalloc( (void **)&hm, sizeof(int) * numpositions);
 	cudaMemcpy(hm, heatmap[0], sizeof(int) * numpositions, cudaMemcpyHostToDevice);
+
+
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	cudaEventRecord(start);
 	fadeKernel<<<blockGridRows, threadBlockRows>>>(hm);
 	cudaThreadSynchronize();
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+	float ms = 0;
+	cudaEventElapsedTime(&ms, start, stop),
+	totfade +=ms;
+	printf("fade: %f ms\n", totfade);
 
 	cudaMemcpy(heatmap[0], hm, sizeof(int) * numpositions, cudaMemcpyDeviceToHost);
 	cudaFree(hm);
@@ -276,7 +279,6 @@ void scaleHeatmap(int ** heatmap, int ** scalemap){
 
 
 	cudaMemcpy(scalemap[0], sm, sizeof(int) * SCALED_SIZE*SCALED_SIZE, cudaMemcpyDeviceToHost);
-	cudaMemcpy(heatmap[0], hm, sizeof(int) * numpositions, cudaMemcpyDeviceToHost);
 
 	cudaFree(hm);
 	cudaFree(sm);
@@ -315,6 +317,7 @@ void blurHeatmap(int ** scalemap, int ** blurmap){
 	cudaEventElapsedTime(&ms, start, stop),
 	totblur +=ms;
 	printf("blur: %f ms\n", totblur);
+
 
 	cudaMemcpy(blurmap[0], bm, sizeof(int) * numpositions, cudaMemcpyDeviceToHost);
 	cudaFree(sm);

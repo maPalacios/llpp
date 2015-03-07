@@ -34,6 +34,7 @@ int main(int argc, char*argv[]) {
 	int par = SEQ;
 	int np = 1;
 	int collisionMode = PTHREAD;
+	int heatmapMode = 0;
 	// 1.02
 	// Argument handling
 	while(i < argc)
@@ -57,6 +58,9 @@ int main(int argc, char*argv[]) {
 			} else if(strcmp(&argv[i][2],"comp") == 0){
 				collisionMode = OMP;
 				cout << "Using OMP collision detection.\n";
+			} else if(strcmp(&argv[i][2], "chmap") == 0) {
+				heatmapMode = 1;
+				cout << "using cuda for heatmap scaling.\n";
 			}
 			else if(strcmp(&argv[i][2],"cseq") == 0 || strcmp(&argv[i][2],"simd") == 0){
 				collisionMode = SEQ;
@@ -106,7 +110,7 @@ int main(int argc, char*argv[]) {
 	model.setup(parser.getAgents());
 	model.setPar(par, np);
 	model.setCollisionMode((IMPLEMENTATION)collisionMode);
-
+	model.setHeatmapMode(heatmapMode);
 	QApplication app(argc, argv);
 	MainWindow mainwindow(model);
 
